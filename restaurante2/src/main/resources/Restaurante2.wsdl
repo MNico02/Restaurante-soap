@@ -12,15 +12,34 @@
   <message name="InsertarReservaResponse">
     <part name="parameters" element="tns:InsertarReservaResponse"/>
   </message>
+  <message name="ConsultarDisponibilidad">
+    <part name="parameters" element="tns:ConsultarDisponibilidadRequest"/>
+  </message>
+  <message name="ConsultarDisponibilidadResponse">
+    <part name="parameters" element="tns:ConsultarDisponibilidadResponse"/>
+  </message>
   <portType name="Restaurante2">
     <operation name="InsertarReserva">
       <input wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/InsertarReservaRequest" message="tns:InsertarReserva"/>
       <output wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/InsertarReservaResponse" message="tns:InsertarReservaResponse"/>
     </operation>
+    <operation name="ConsultarDisponibilidad">
+      <input wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/ConsultarDisponibilidadRequest" message="tns:ConsultarDisponibilidad"/>
+      <output wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/ConsultarDisponibilidadResponse" message="tns:ConsultarDisponibilidadResponse"/>
+    </operation>
   </portType>
   <binding name="Restaurante2PortBinding" type="tns:Restaurante2">
     <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
     <operation name="InsertarReserva">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="ConsultarDisponibilidad">
       <soap:operation soapAction=""/>
       <input>
         <soap:body use="literal"/>

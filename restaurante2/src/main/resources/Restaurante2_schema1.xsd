@@ -1,9 +1,46 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xs:schema version="1.0" targetNamespace="http://services.restaurante2.das.ubp.edu.ar/" xmlns:tns="http://services.restaurante2.das.ubp.edu.ar/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
+  <xs:element name="ConsultarDisponibilidadRequest" type="tns:ConsultarDisponibilidadRequest"/>
+
+  <xs:element name="ConsultarDisponibilidadResponse" type="tns:ConsultarDisponibilidadResponse"/>
+
   <xs:element name="InsertarReservaRequest" type="tns:InsertarReservaRequest"/>
 
   <xs:element name="InsertarReservaResponse" type="tns:InsertarReservaResponse"/>
+
+  <xs:complexType name="ConsultarDisponibilidadRequest">
+    <xs:sequence>
+      <xs:element name="soliHorario" type="tns:soliHorarioBean" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="soliHorarioBean">
+    <xs:sequence>
+      <xs:element name="cantComensales" type="xs:int"/>
+      <xs:element name="codZona" type="xs:int"/>
+      <xs:element name="fecha" type="xs:string" minOccurs="0"/>
+      <xs:element name="idSucursal" type="xs:int"/>
+      <xs:element name="menores" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ConsultarDisponibilidadResponse">
+    <xs:sequence>
+      <xs:element name="HorariosResponse" type="tns:horarioBean" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="horarioBean">
+    <xs:sequence>
+      <xs:element name="horaHasta" type="tns:time" minOccurs="0"/>
+      <xs:element name="horaReserva" type="tns:time" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="time">
+    <xs:sequence/>
+  </xs:complexType>
 
   <xs:complexType name="InsertarReservaRequest">
     <xs:sequence>

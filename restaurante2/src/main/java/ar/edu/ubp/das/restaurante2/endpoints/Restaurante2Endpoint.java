@@ -30,6 +30,20 @@ public class Restaurante2Endpoint {
         return response;
     }
 
+        @PayloadRoot(namespace = NAMESPACE_URI, localPart =
+            "ConsultarDisponibilidadRequest")
+    @ResponsePayload
+    public ConsultarDisponibilidadResponse consultarDisponibilidad(@RequestPayload ConsultarDisponibilidad request) {
+        SoliHorarioBean soliHorarioBean = request.getSoliHorario();
+        List<HorarioBean> horarios = service.obtenerLocalidades(soliHorarioBean);
+
+        ConsultarDisponibilidadResponse response = new ConsultarDisponibilidadResponse();
+        response.setHorariosResponse(horarios);
+        return response;
+    }
+
+
+
 
 
 //    @PayloadRoot(namespace = NAMESPACE_URI, localPart =

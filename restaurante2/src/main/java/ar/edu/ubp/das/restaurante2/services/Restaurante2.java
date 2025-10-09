@@ -1,5 +1,7 @@
 package ar.edu.ubp.das.restaurante2.services;
+import ar.edu.ubp.das.restaurante2.beans.HorarioBean;
 import ar.edu.ubp.das.restaurante2.beans.ReservaBean;
+import ar.edu.ubp.das.restaurante2.beans.SoliHorarioBean;
 import ar.edu.ubp.das.restaurante2.repositories.Restaurante2Repository;
 import jakarta.jws.WebMethod;
 import jakarta.jws.WebParam;
@@ -27,6 +29,15 @@ public class Restaurante2 {
                                   ReservaBean reserva) {
         return restaurante2Repository.insReserva(reserva);
     }
+
+    @WebMethod(operationName = "ConsultarDisponibilidad")
+    @RequestWrapper(localName = "ConsultarDisponibilidadRequest")
+    @ResponseWrapper(localName = "ConsultarDisponibilidadResponse")
+    @WebResult(name = "HorariosResponse")
+    public List<HorarioBean> obtenerLocalidades(@WebParam(name = "soliHorario") SoliHorarioBean soliHorarioBean) {
+        return restaurante2Repository.getHorarios(soliHorarioBean);
+    }
+
 //
 //    @WebMethod(operationName = "ObtenerProvincias")
 //    @RequestWrapper(localName = "ObtenerProvinciasRequest")

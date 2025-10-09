@@ -3,14 +3,13 @@ package ar.edu.ubp.das.restaurante2.beans;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import java.time.LocalDate;
+
 
 
 public class SoliHorarioBean {
     private int idSucursal;
     private int codZona;
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate fecha;
+    private String fecha;
     private int cantComensales;
     private boolean menores;
 
@@ -30,11 +29,11 @@ public class SoliHorarioBean {
         this.codZona = codZona;
     }
 
-    public LocalDate getFecha() {
+    public String getFecha() {
         return fecha;
     }
 
-    public void setFecha(LocalDate fecha) {
+    public void setFecha(String fecha) {
         this.fecha = fecha;
     }
 

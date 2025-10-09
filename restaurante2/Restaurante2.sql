@@ -311,16 +311,16 @@ GO
 
 
 INSERT INTO dbo.provincias (cod_provincia, nom_provincia) VALUES
-(14, N'Córdoba');
+(14, N'Cï¿½rdoba');
 
 INSERT INTO dbo.localidades (nro_localidad, nom_localidad, cod_provincia) VALUES
 (1001, N'Guemes', 14),
 (1002, N'General Paz', 14),
-(1003, N'Nueva Córdoba', 14),
+(1003, N'Nueva Cï¿½rdoba', 14),
 (1004, N'Centro', 14);
 
 /* =======================
-   Categorías de precios
+   Categorï¿½as de precios
    =======================*/
 INSERT INTO dbo.categorias_precios (nro_categoria, nom_categoria) VALUES
 (1, N'Baja'), (2, N'Media'), (3, N'Alta');
@@ -329,13 +329,13 @@ INSERT INTO dbo.categorias_precios (nro_categoria, nom_categoria) VALUES
    Zonas disponibles
    =======================*/
 INSERT INTO dbo.zonas (cod_zona, nom_zona) VALUES
-(1, N'Salón'), (2, N'Terraza'), (3, N'Patio');
+(1, N'Salï¿½n'), (2, N'Terraza'), (3, N'Patio');
 
 /* =======================
    Tipos de comidas (agrego la nueva)
    =======================*/
 INSERT INTO dbo.tipos_comidas (nro_tipo_comida, nom_tipo_comida) VALUES
-(2, N'Fusión japonesa-peruana');
+(2, N'Fusiï¿½n japonesa-peruana');
 
 
 /* =======================
@@ -352,26 +352,26 @@ INSERT INTO dbo.sucursales
 (nro_restaurante, nro_sucursal, nom_sucursal, calle, nro_calle, barrio, nro_localidad, cod_postal, telefonos,
  total_comensales, min_tolerencia_reserva, nro_categoria)
 VALUES
-(2, 1, N'Nueva Córdoba', N'Chile',      N'350',  N'Nueva Córdoba', 1003, N'5000', N'351-5552001', 70, 10, 3),
-(2, 2, N'Güemes',        N'Belgrano',   N'1200', N'Güemes',        1002, N'5000', N'351-5552002', 60, 15, 2),
-(2, 3, N'Alta Córdoba',  N'Rodriguez',  N'800',  N'Alta Córdoba',  1001, N'5000', N'351-5552003', 80, 15, 2),
-(2, 4, N'Centro',        N'San Martín', N'400',  N'Centro',        1004, N'5000', N'351-5552004', 90, 20, 3);
+(2, 1, N'Nueva Cï¿½rdoba', N'Chile',      N'350',  N'Nueva Cï¿½rdoba', 1003, N'5000', N'351-5552001', 70, 10, 3),
+(2, 2, N'Gï¿½emes',        N'Belgrano',   N'1200', N'Gï¿½emes',        1002, N'5000', N'351-5552002', 60, 15, 2),
+(2, 3, N'Alta Cï¿½rdoba',  N'Rodriguez',  N'800',  N'Alta Cï¿½rdoba',  1001, N'5000', N'351-5552003', 80, 15, 2),
+(2, 4, N'Centro',        N'San Martï¿½n', N'400',  N'Centro',        1004, N'5000', N'351-5552004', 90, 20, 3);
 
 
 
-/* Nueva Córdoba: total 70 */
+/* Nueva Cï¿½rdoba: total 70 */
 INSERT INTO dbo.zonas_sucursales
 (nro_restaurante, nro_sucursal, cod_zona, cant_comensales, permite_menores, habilitada)
 VALUES
 (2,1,1,50,1,1), (2,1,2,20,1,1);
 
-/* Güemes: total 60 */
+/* Gï¿½emes: total 60 */
 INSERT INTO dbo.zonas_sucursales
 (nro_restaurante, nro_sucursal, cod_zona, cant_comensales, permite_menores, habilitada)
 VALUES
 (2,2,1,40,1,1), (2,2,2,20,1,1);
 
-/* Alta Córdoba: total 80 */
+/* Alta Cï¿½rdoba: total 80 */
 INSERT INTO dbo.zonas_sucursales
 (nro_restaurante, nro_sucursal, cod_zona, cant_comensales, permite_menores, habilitada)
 VALUES
@@ -396,7 +396,7 @@ INSERT INTO dbo.turnos_sucursales (nro_restaurante, nro_sucursal, hora_reserva, 
 
 
 
-/* Todas las sucursales sirven Fusión japonesa-peruana */
+/* Todas las sucursales sirven Fusiï¿½n japonesa-peruana */
 INSERT INTO dbo.tipos_comidas_sucursales (nro_restaurante, nro_sucursal, nro_tipo_comida, habilitado)
 VALUES (2,1,2,1),(2,2,2,1),(2,3,2,1),(2,4,2,1);
 
@@ -415,7 +415,7 @@ VALUES
 INSERT INTO dbo.especialidades_alimentarias (nro_restriccion, nom_restriccion) VALUES
 (1, N'comidas a la llamas'), (2, N'comida picante');
 
-/* Especialidades alimentarias (Vegetariano y Celíaco habilitados) */
+/* Especialidades alimentarias (Vegetariano y Celï¿½aco habilitados) */
 INSERT INTO dbo.especialidades_alimentarias_sucursales (nro_restaurante, nro_sucursal, nro_restriccion, habilitada)
 VALUES
 (2,1,1,1),(2,1,2,1),
@@ -426,30 +426,30 @@ VALUES
 
 
 /* =======================
-   Nueva Córdoba (sucursal 1, zonas 1 y 2)
+   Nueva Cï¿½rdoba (sucursal 1, zonas 1 y 2)
    =======================*/
 INSERT INTO dbo.zonas_turnos_sucursales
 (nro_restaurante, nro_sucursal, cod_zona, hora_reserva, permite_menores)
 VALUES
-(2,1,1,'12:00',1),(2,1,1,'20:00',1),  -- Salón
+(2,1,1,'12:00',1),(2,1,1,'20:00',1),  -- Salï¿½n
 (2,1,2,'12:00',1),(2,1,2,'20:00',1);  -- Terraza
 
 /* =======================
-   Güemes (sucursal 2, zonas 1 y 2)
+   Gï¿½emes (sucursal 2, zonas 1 y 2)
    =======================*/
 INSERT INTO dbo.zonas_turnos_sucursales
 (nro_restaurante, nro_sucursal, cod_zona, hora_reserva, permite_menores)
 VALUES
-(2,2,1,'12:00',1),(2,2,1,'20:00',1),  -- Salón
+(2,2,1,'12:00',1),(2,2,1,'20:00',1),  -- Salï¿½n
 (2,2,2,'12:00',1),(2,2,2,'20:00',1);  -- Terraza
 
 /* =======================
-   Alta Córdoba (sucursal 3, zonas 1 y 2)
+   Alta Cï¿½rdoba (sucursal 3, zonas 1 y 2)
    =======================*/
 INSERT INTO dbo.zonas_turnos_sucursales
 (nro_restaurante, nro_sucursal, cod_zona, hora_reserva, permite_menores)
 VALUES
-(2,3,1,'12:00',1),(2,3,1,'20:00',1),  -- Salón
+(2,3,1,'12:00',1),(2,3,1,'20:00',1),  -- Salï¿½n
 (2,3,2,'12:00',1),(2,3,2,'20:00',1);  -- Terraza
 
 /* =======================
@@ -458,7 +458,7 @@ VALUES
 INSERT INTO dbo.zonas_turnos_sucursales
 (nro_restaurante, nro_sucursal, cod_zona, hora_reserva, permite_menores)
 VALUES
-(2,4,1,'12:00',1),(2,4,1,'20:00',1),  -- Salón
+(2,4,1,'12:00',1),(2,4,1,'20:00',1),  -- Salï¿½n
 (2,4,2,'12:00',1),(2,4,2,'20:00',1),  -- Terraza
 (2,4,3,'12:00',0),(2,4,3,'20:00',0);  -- Patio (no menores)
 go
@@ -567,3 +567,93 @@ go
     (apellido, nombre, correo, telefonos)
     VALUES ('Ghinamoo','Estabano','aaa@aaa.com','+54 351 55512342')
 go
+
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+GO
+
+CREATE OR ALTER PROCEDURE dbo.get_horarios_disponibles
+    @nro_restaurante INT,
+    @nro_sucursal    INT,
+    @cod_zona        INT,
+    @fecha           DATE,
+    @cant_personas   INT,
+    @menores         BIT
+    AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @cant_personas <= 0
+BEGIN
+        RAISERROR('La cantidad de personas debe ser mayor a 0.', 16, 1);
+        RETURN;
+END
+
+    -- Verificar que la zona exista y estï¿½ habilitada para la sucursal
+    IF NOT EXISTS (
+        SELECT 1
+        FROM dbo.zonas_sucursales zs
+        WHERE zs.nro_restaurante = @nro_restaurante
+          AND zs.nro_sucursal    = @nro_sucursal
+          AND zs.cod_zona        = @cod_zona
+          AND zs.habilitada      = 1
+    )
+BEGIN
+        -- Devuelve vacï¿½o
+SELECT CAST(NULL AS TIME(0)) AS hora_reserva,
+       CAST(NULL AS TIME(0)) AS hora_hasta,
+       NULL AS capacidad_total,
+       NULL AS ocupados,
+       NULL AS cupo_disponible
+    WHERE 1 = 0;
+RETURN;
+END
+
+    ;WITH Turnos AS (
+    /* Turnos vï¿½lidos para la sucursal y que ademï¿½s estï¿½n asociados a la zona */
+    SELECT t.nro_restaurante, t.nro_sucursal, t.hora_reserva, t.hora_hasta
+    FROM dbo.turnos_sucursales t
+             INNER JOIN dbo.zonas_turnos_sucursales zts
+                        ON zts.nro_restaurante = t.nro_restaurante
+                            AND zts.nro_sucursal    = t.nro_sucursal
+                            AND zts.hora_reserva    = t.hora_reserva
+                            AND zts.cod_zona        = @cod_zona
+    WHERE t.nro_restaurante = @nro_restaurante
+      AND t.nro_sucursal    = @nro_sucursal
+      AND t.habilitado      = 1
+),
+          Zona AS (
+              SELECT zs.cant_comensales, zs.permite_menores, zs.habilitada
+              FROM dbo.zonas_sucursales zs
+              WHERE zs.nro_restaurante = @nro_restaurante
+                AND zs.nro_sucursal    = @nro_sucursal
+                AND zs.cod_zona        = @cod_zona
+          ),
+          Ocupacion AS (
+              SELECT
+                  r.hora_reserva,
+                  ocupados = SUM(ISNULL(r.cant_adultos,0) + ISNULL(r.cant_menores,0))
+              FROM dbo.reservas_sucursales r
+              WHERE r.nro_restaurante = @nro_restaurante
+                AND r.nro_sucursal    = @nro_sucursal
+                AND r.cod_zona        = @cod_zona
+                AND r.fecha_reserva   = @fecha
+                AND ISNULL(r.cancelada,0) = 0
+              GROUP BY r.hora_reserva
+          )
+
+     SELECT
+         t.hora_reserva,
+         t.hora_hasta
+     FROM Turnos t
+              CROSS JOIN Zona z
+              LEFT JOIN Ocupacion o
+                        ON o.hora_reserva = t.hora_reserva
+     WHERE
+       -- Cupo suficiente
+         (z.cant_comensales - ISNULL(o.ocupados,0)) >= @cant_personas
+       -- Si hay menores en la solicitud, la zona debe permitir menores
+       AND ( @menores = 0 OR z.permite_menores = 1 )
+     ORDER BY t.hora_reserva;
+END
+GO
