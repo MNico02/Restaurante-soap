@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://services.restaurante2.das.ubp.edu.ar/" xmlns:tns="http://services.restaurante2.das.ubp.edu.ar/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="InsertarReservaRequest" type="tns:InsertarReservaRequest"/>
+
+  <xs:element name="InsertarReservaResponse" type="tns:InsertarReservaResponse"/>
+
+  <xs:complexType name="InsertarReservaRequest">
+    <xs:sequence>
+      <xs:element name="Reserva" type="tns:reservaBean" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="reservaBean">
+    <xs:sequence>
+      <xs:element name="apellido" type="xs:string" minOccurs="0"/>
+      <xs:element name="cantAdultos" type="xs:int"/>
+      <xs:element name="cantMenores" type="xs:int"/>
+      <xs:element name="codZona" type="xs:int"/>
+      <xs:element name="correo" type="xs:string" minOccurs="0"/>
+      <xs:element name="costoReserva" type="xs:float"/>
+      <xs:element name="fechaReserva" type="xs:string" minOccurs="0"/>
+      <xs:element name="horaReserva" type="xs:string" minOccurs="0"/>
+      <xs:element name="idSucursal" type="xs:int"/>
+      <xs:element name="nombre" type="xs:string" minOccurs="0"/>
+      <xs:element name="telefono" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="InsertarReservaResponse">
+    <xs:sequence>
+      <xs:element name="CodigoReserva" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+
