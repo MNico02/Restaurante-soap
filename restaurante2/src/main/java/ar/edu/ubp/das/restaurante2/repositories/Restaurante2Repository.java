@@ -53,7 +53,7 @@ public class Restaurante2Repository {
     }
     public List<HorarioBean> getHorarios(SoliHorarioBean data) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("nro_restaurante", 1, Types.INTEGER)
+                .addValue("nro_restaurante", 2, Types.INTEGER)
                 .addValue("nro_sucursal", data.getIdSucursal(), Types.INTEGER)
                 .addValue("cod_zona", data.getCodZona(), Types.INTEGER)
                 .addValue("fecha",java.sql.Date.valueOf(data.getFecha()), Types.DATE)

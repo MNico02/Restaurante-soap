@@ -657,3 +657,19 @@ END
      ORDER BY t.hora_reserva;
 END
 GO
+
+
+-- 1) turnos de la sucursal
+SELECT * FROM dbo.turnos_sucursales
+WHERE nro_restaurante = 2 AND nro_sucursal = 1;
+
+-- 2) zonas_turnos_sucursales (zona habilitada en turno)
+SELECT * FROM dbo.zonas_turnos_sucursales
+WHERE nro_restaurante = 2 AND nro_sucursal = 1 AND cod_zona = 1;
+
+-- 3) verificar capacidades (suma de zonas y total_comensales)
+SELECT s.total_comensales, zs.cod_zona, zs.cant_comensales
+FROM dbo.sucursales s
+JOIN dbo.zonas_sucursales zs
+  ON s.nro_restaurante = zs.nro_restaurante AND s.nro_sucursal = zs.nro_sucursal
+WHERE s.nro_restaurante = 2 AND s.nro_sucursal = 1;

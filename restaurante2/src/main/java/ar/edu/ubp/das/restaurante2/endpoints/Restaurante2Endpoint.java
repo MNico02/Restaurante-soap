@@ -7,6 +7,8 @@ import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Endpoint
@@ -35,10 +37,18 @@ public class Restaurante2Endpoint {
     @ResponsePayload
     public ConsultarDisponibilidadResponse consultarDisponibilidad(@RequestPayload ConsultarDisponibilidad request) {
         SoliHorarioBean soliHorarioBean = request.getSoliHorario();
+            System.out.println(">>> solicitar disponibilidad - soliHorarioBean = " + soliHorarioBean);
         List<HorarioBean> horarios = service.obtenerLocalidades(soliHorarioBean);
 
+            System.out.println(">>> obtenerLocalidades devolvió horarios = " + horarios);
+            System.out.println(">>> size = " + (horarios == null ? "null" : horarios.size()));
+
         ConsultarDisponibilidadResponse response = new ConsultarDisponibilidadResponse();
-        response.setHorariosResponse(horarios);
+            if (horarios == null) {
+                response.setHorariosResponse(new ArrayList<HorarioBean>());
+            } else {
+                response.setHorariosResponse(horarios);
+            }
         return response;
     }
 

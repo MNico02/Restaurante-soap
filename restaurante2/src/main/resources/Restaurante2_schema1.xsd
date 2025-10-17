@@ -33,13 +33,9 @@
 
   <xs:complexType name="horarioBean">
     <xs:sequence>
-      <xs:element name="horaHasta" type="tns:time" minOccurs="0"/>
-      <xs:element name="horaReserva" type="tns:time" minOccurs="0"/>
+      <xs:element name="horaHasta" type="xs:string" minOccurs="0"/>
+      <xs:element name="horaReserva" type="xs:string" minOccurs="0"/>
     </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="time">
-    <xs:sequence/>
   </xs:complexType>
 
   <xs:complexType name="InsertarReservaRequest">
