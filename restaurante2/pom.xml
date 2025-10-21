@@ -130,6 +130,15 @@
             <groupId>org.springframework.ws</groupId>
             <artifactId>spring-ws-security</artifactId>
         </dependency>
+
+
+
+        <!-- dependencia de seguridad -->
+        <dependency>
+            <groupId>org.springframework.ws</groupId>
+            <artifactId>spring-ws-security</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -154,7 +163,9 @@
                             <resourceDestDir>${project.build.directory}/generated/wsdl</resourceDestDir>
                             <genWsdl>true</genWsdl>
                             <keep>true</keep>
+
                             <verbose>true</verbose>
+
                         </configuration>
                     </execution>
                 </executions>

@@ -2,6 +2,7 @@ package ar.edu.ubp.das.restaurante2.endpoints;
 import ar.edu.ubp.das.restaurante2.beans.*;
 import ar.edu.ubp.das.restaurante2.services.Restaurante2;
 import ar.edu.ubp.das.restaurante2.services.jaxws.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
@@ -38,7 +39,7 @@ public class Restaurante2Endpoint {
     public ConsultarDisponibilidadResponse consultarDisponibilidad(@RequestPayload ConsultarDisponibilidad request) {
         SoliHorarioBean soliHorarioBean = request.getSoliHorario();
             System.out.println(">>> solicitar disponibilidad - soliHorarioBean = " + soliHorarioBean);
-        List<HorarioBean> horarios = service.obtenerLocalidades(soliHorarioBean);
+        List<HorarioBean> horarios = service.obtenerHorarios(soliHorarioBean);
 
             System.out.println(">>> obtenerLocalidades devolvió horarios = " + horarios);
             System.out.println(">>> size = " + (horarios == null ? "null" : horarios.size()));
@@ -52,6 +53,18 @@ public class Restaurante2Endpoint {
         return response;
     }
 
+       @PayloadRoot(namespace = NAMESPACE_URI, localPart =
+            "GetInfoRestauranteRequest")
+        @ResponsePayload
+    public GetInfoRestauranteResponse getRestaurante(@RequestPayload GetInfoRestauranteRequest request) throws JsonProcessingException {
+
+            int id = request.getId();
+            RestauranteBean restaurante = service.getRestaurante(id);
+
+            GetInfoRestauranteResponse response = new GetInfoRestauranteResponse();
+            response.setInfoRestaurante(restaurante);
+            return response;
+        }
 
 
 

@@ -1,8 +1,10 @@
 package ar.edu.ubp.das.restaurante2.services;
 import ar.edu.ubp.das.restaurante2.beans.HorarioBean;
 import ar.edu.ubp.das.restaurante2.beans.ReservaBean;
+import ar.edu.ubp.das.restaurante2.beans.RestauranteBean;
 import ar.edu.ubp.das.restaurante2.beans.SoliHorarioBean;
 import ar.edu.ubp.das.restaurante2.repositories.Restaurante2Repository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.jws.WebMethod;
 import jakarta.jws.WebParam;
 import jakarta.jws.WebResult;
@@ -34,9 +36,19 @@ public class Restaurante2 {
     @RequestWrapper(localName = "ConsultarDisponibilidadRequest")
     @ResponseWrapper(localName = "ConsultarDisponibilidadResponse")
     @WebResult(name = "HorariosResponse")
-    public List<HorarioBean> obtenerLocalidades(@WebParam(name = "soliHorario") SoliHorarioBean soliHorarioBean) {
+    public List<HorarioBean> obtenerHorarios(@WebParam(name = "soliHorario") SoliHorarioBean soliHorarioBean) {
         return restaurante2Repository.getHorarios(soliHorarioBean);
     }
+
+
+    @WebMethod(operationName = "GetInfoRestaurante")
+    @RequestWrapper(localName = "GetInfoRestauranteRequest", targetNamespace = "http://services.restaurante2.das.ubp.edu.ar/", className = "ar.edu.ubp.das.restaurante2.services.jaxws.GetInfoRestauranteRequest")
+    @ResponseWrapper(localName = "GetInfoRestauranteResponse", targetNamespace = "http://services.restaurante2.das.ubp.edu.ar/", className = "ar.edu.ubp.das.restaurante2.services.jaxws.GetInfoRestauranteResponse")
+    @WebResult(name = "InfoRestaurante", targetNamespace = "http://services.restaurante2.das.ubp.edu.ar/")
+    public RestauranteBean getRestaurante(@WebParam(name = "id", targetNamespace = "http://services.restaurante2.das.ubp.edu.ar/") int id) throws JsonProcessingException {
+        return restaurante2Repository.getInfoRestaurante(id);
+    }
+
 
 //
 //    @WebMethod(operationName = "ObtenerProvincias")

@@ -5,9 +5,15 @@
 
   <xs:element name="ConsultarDisponibilidadResponse" type="tns:ConsultarDisponibilidadResponse"/>
 
+  <xs:element name="GetInfoRestauranteRequest" type="tns:GetInfoRestauranteRequest"/>
+
+  <xs:element name="GetInfoRestauranteResponse" type="tns:GetInfoRestauranteResponse"/>
+
   <xs:element name="InsertarReservaRequest" type="tns:InsertarReservaRequest"/>
 
   <xs:element name="InsertarReservaResponse" type="tns:InsertarReservaResponse"/>
+
+  <xs:element name="JsonProcessingException" type="tns:JsonProcessingException"/>
 
   <xs:complexType name="ConsultarDisponibilidadRequest">
     <xs:sequence>
@@ -64,6 +70,111 @@
     <xs:sequence>
       <xs:element name="CodigoReserva" type="xs:string" minOccurs="0"/>
     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="GetInfoRestauranteRequest">
+    <xs:sequence>
+      <xs:element name="id" type="xs:int" form="qualified"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="GetInfoRestauranteResponse">
+    <xs:sequence>
+      <xs:element name="InfoRestaurante" type="tns:restauranteBean" form="qualified" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="restauranteBean">
+    <xs:sequence>
+      <xs:element name="contenidos" type="tns:contenidoBean" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="cuit" type="xs:string" minOccurs="0"/>
+      <xs:element name="nroRestaurante" type="xs:int"/>
+      <xs:element name="razonSocial" type="xs:string" minOccurs="0"/>
+      <xs:element name="sucursales" type="tns:sucursalBean" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="contenidoBean">
+    <xs:sequence>
+      <xs:element name="contenidoAPublicar" type="xs:string" minOccurs="0"/>
+      <xs:element name="costoClick" type="xs:decimal" minOccurs="0"/>
+      <xs:element name="imagenAPublicar" type="xs:string" minOccurs="0"/>
+      <xs:element name="nroContenido" type="xs:int"/>
+      <xs:element name="nroSucursal" type="xs:int" minOccurs="0"/>
+      <xs:element name="publicado" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="sucursalBean">
+    <xs:sequence>
+      <xs:element name="barrio" type="xs:string" minOccurs="0"/>
+      <xs:element name="calle" type="xs:string" minOccurs="0"/>
+      <xs:element name="categoriaPrecio" type="xs:string" minOccurs="0"/>
+      <xs:element name="codPostal" type="xs:string" minOccurs="0"/>
+      <xs:element name="codProvincia" type="xs:int"/>
+      <xs:element name="contenidos" type="tns:contenidoBean" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="especialidades" type="tns:especialidadBean" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="estilos" type="tns:estiloBean" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="minTolerenciaReserva" type="xs:int"/>
+      <xs:element name="nomLocalidad" type="xs:string" minOccurs="0"/>
+      <xs:element name="nomProvincia" type="xs:string" minOccurs="0"/>
+      <xs:element name="nomSucursal" type="xs:string" minOccurs="0"/>
+      <xs:element name="nroCalle" type="xs:string" minOccurs="0"/>
+      <xs:element name="nroCategoria" type="xs:int"/>
+      <xs:element name="nroLocalidad" type="xs:int"/>
+      <xs:element name="nroSucursal" type="xs:int"/>
+      <xs:element name="telefonos" type="xs:string" minOccurs="0"/>
+      <xs:element name="tiposComidas" type="tns:tipoComidaBean" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="totalComensales" type="xs:int"/>
+      <xs:element name="zonas" type="tns:zonaBean" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="especialidadBean">
+    <xs:sequence>
+      <xs:element name="habilitada" type="xs:boolean"/>
+      <xs:element name="nomRestriccion" type="xs:string" minOccurs="0"/>
+      <xs:element name="nroRestriccion" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="estiloBean">
+    <xs:sequence>
+      <xs:element name="habilitado" type="xs:boolean"/>
+      <xs:element name="nomEstilo" type="xs:string" minOccurs="0"/>
+      <xs:element name="nroEstilo" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="tipoComidaBean">
+    <xs:sequence>
+      <xs:element name="habilitado" type="xs:boolean"/>
+      <xs:element name="nomTipoComida" type="xs:string" minOccurs="0"/>
+      <xs:element name="nroTipoComida" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="zonaBean">
+    <xs:sequence>
+      <xs:element name="cantComensales" type="xs:int"/>
+      <xs:element name="codZona" type="xs:int"/>
+      <xs:element name="habilitada" type="xs:boolean"/>
+      <xs:element name="nomZona" type="xs:string" minOccurs="0"/>
+      <xs:element name="permiteMenores" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="JsonProcessingException">
+    <xs:sequence>
+      <xs:element name="location" type="tns:jsonLocation" minOccurs="0"/>
+      <xs:element name="message" type="xs:string" minOccurs="0"/>
+      <xs:element name="originalMessage" type="xs:string" minOccurs="0"/>
+      <xs:element name="processor" type="xs:anyType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="jsonLocation">
+    <xs:sequence/>
   </xs:complexType>
 </xs:schema>
 

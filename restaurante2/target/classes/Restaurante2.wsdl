@@ -12,6 +12,15 @@
   <message name="ConsultarDisponibilidadResponse">
     <part name="parameters" element="tns:ConsultarDisponibilidadResponse"/>
   </message>
+  <message name="GetInfoRestaurante">
+    <part name="parameters" element="tns:GetInfoRestauranteRequest"/>
+  </message>
+  <message name="GetInfoRestauranteResponse">
+    <part name="parameters" element="tns:GetInfoRestauranteResponse"/>
+  </message>
+  <message name="JsonProcessingException">
+    <part name="fault" element="tns:JsonProcessingException"/>
+  </message>
   <message name="InsertarReserva">
     <part name="parameters" element="tns:InsertarReservaRequest"/>
   </message>
@@ -22,6 +31,11 @@
     <operation name="ConsultarDisponibilidad">
       <input wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/ConsultarDisponibilidadRequest" message="tns:ConsultarDisponibilidad"/>
       <output wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/ConsultarDisponibilidadResponse" message="tns:ConsultarDisponibilidadResponse"/>
+    </operation>
+    <operation name="GetInfoRestaurante">
+      <input wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/GetInfoRestauranteRequest" message="tns:GetInfoRestaurante"/>
+      <output wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/GetInfoRestauranteResponse" message="tns:GetInfoRestauranteResponse"/>
+      <fault message="tns:JsonProcessingException" name="JsonProcessingException" wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/GetInfoRestaurante/Fault/JsonProcessingException"/>
     </operation>
     <operation name="InsertarReserva">
       <input wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/InsertarReservaRequest" message="tns:InsertarReserva"/>
@@ -38,6 +52,18 @@
       <output>
         <soap:body use="literal"/>
       </output>
+    </operation>
+    <operation name="GetInfoRestaurante">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="JsonProcessingException">
+        <soap:fault name="JsonProcessingException" use="literal"/>
+      </fault>
     </operation>
     <operation name="InsertarReserva">
       <soap:operation soapAction=""/>
