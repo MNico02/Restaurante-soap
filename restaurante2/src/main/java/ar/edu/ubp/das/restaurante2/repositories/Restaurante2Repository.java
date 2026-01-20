@@ -344,7 +344,7 @@ public class Restaurante2Repository {
     public record ContenidoKey(int nroContenido, int nroRestaurante) {}
 
     public List<ContenidoBean> getPromociones(int nroRestaurante) {
-
+        //System.out.println(">>> REPO nro_restaurante = [" + nroRestaurante + "]");
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("nro_restaurante", nroRestaurante, Types.INTEGER);
 

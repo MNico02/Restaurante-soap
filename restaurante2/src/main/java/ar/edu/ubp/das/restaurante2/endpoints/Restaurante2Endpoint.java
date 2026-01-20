@@ -36,12 +36,19 @@ public class Restaurante2Endpoint {
     @ResponsePayload
     public ConsultarDisponibilidadResponse consultarDisponibilidad(@RequestPayload ConsultarDisponibilidad request) {
         SoliHorarioBean soliHorarioBean = request.getSoliHorario();
-            System.out.println(">>> solicitar disponibilidad - soliHorarioBean = " + soliHorarioBean);
-        List<HorarioBean> horarios = service.obtenerHorarios(soliHorarioBean);
 
+        /*System.out.println("=================================");
+        System.out.println("ID SUCURSAL     = " + soliHorarioBean.getIdSucursal());
+        System.out.println("COD ZONA        = " + soliHorarioBean.getCodZona());
+        System.out.println("FECHA           = " + soliHorarioBean.getFecha());
+        System.out.println("CANT COMENSALES = " + soliHorarioBean.getCantComensales());
+        System.out.println("MENORES         = " + soliHorarioBean.isMenores());
+        System.out.println("=================================");*/
+        List<HorarioBean> horarios = service.obtenerHorarios(soliHorarioBean);
+/*
             System.out.println(">>> obtenerLocalidades devolvió horarios = " + horarios);
             System.out.println(">>> size = " + (horarios == null ? "null" : horarios.size()));
-
+*/
         ConsultarDisponibilidadResponse response = new ConsultarDisponibilidadResponse();
             if (horarios == null) {
                 response.setHorariosResponse(new ArrayList<HorarioBean>());

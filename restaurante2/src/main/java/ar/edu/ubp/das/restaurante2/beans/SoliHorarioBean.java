@@ -4,7 +4,12 @@ package ar.edu.ubp.das.restaurante2.beans;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlType;
 
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "SoliHorario")
 
 public class SoliHorarioBean {
     private int idSucursal;

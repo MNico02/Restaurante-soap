@@ -14,6 +14,7 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType(name = "obtenerPromocionesResponse", namespace = "http://services.restaurante2.das.ubp.edu.ar/")
 public class ObtenerPromocionesResponse {
 
+
     @XmlElement(name = "Promociones", namespace = "")
     private List<ContenidoBean> promociones;
 

@@ -1,16 +1,23 @@
 package ar.edu.ubp.das.restaurante2.beans;
 
-
+import jakarta.xml.bind.annotation.*;
 
 import java.math.BigDecimal;
 
 public class ContenidoBean {
+
     private Integer nroSucursal; // null si es general del restaurante
+
     private int nroContenido;
+
     private String contenidoAPublicar;
+
     private String imagenAPublicar;
+
     private boolean publicado;
+
     private BigDecimal costoClick;
+
 
     public Integer getNroSucursal() { return nroSucursal; }
     public void setNroSucursal(Integer nroSucursal) { this.nroSucursal = nroSucursal; }

@@ -89,6 +89,8 @@ public class Restaurante2 {
             @WebParam(name = "ObtenerPromociones")
             ObtenerPromocionesReqBean req) {
 
+
+        //System.out.println(">>> SOAP obtenerPromociones ID = [" + req.getId() + "]");
         return restaurante2Repository.getPromociones(req.getId());
     }
 
