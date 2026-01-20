@@ -6,11 +6,41 @@
       <xsd:import namespace="http://services.restaurante2.das.ubp.edu.ar/" schemaLocation="Restaurante2_schema1.xsd"/>
     </xsd:schema>
   </types>
+  <message name="ModificarReserva">
+    <part name="parameters" element="tns:ModificarReservaRequest"/>
+  </message>
+  <message name="ModificarReservaResponse">
+    <part name="parameters" element="tns:ModificarReservaResponse"/>
+  </message>
+  <message name="confirmarReserva">
+    <part name="parameters" element="tns:confirmarReservaRequest"/>
+  </message>
+  <message name="confirmarReservaResponse">
+    <part name="parameters" element="tns:confirmarReservaResponse"/>
+  </message>
+  <message name="registrarClicks">
+    <part name="parameters" element="tns:registrarClicksRequest"/>
+  </message>
+  <message name="registrarClicksResponse">
+    <part name="parameters" element="tns:registrarClicksResponse"/>
+  </message>
   <message name="ConsultarDisponibilidad">
     <part name="parameters" element="tns:ConsultarDisponibilidadRequest"/>
   </message>
   <message name="ConsultarDisponibilidadResponse">
     <part name="parameters" element="tns:ConsultarDisponibilidadResponse"/>
+  </message>
+  <message name="cancelarReserva">
+    <part name="parameters" element="tns:cancelarReservaRequest"/>
+  </message>
+  <message name="cancelarReservaResponse">
+    <part name="parameters" element="tns:cancelarReservaResponse"/>
+  </message>
+  <message name="obtenerPromociones">
+    <part name="parameters" element="tns:obtenerPromocionesRequest"/>
+  </message>
+  <message name="obtenerPromocionesResponse">
+    <part name="parameters" element="tns:obtenerPromocionesResponse"/>
   </message>
   <message name="GetInfoRestaurante">
     <part name="parameters" element="tns:GetInfoRestauranteRequest"/>
@@ -21,30 +51,85 @@
   <message name="JsonProcessingException">
     <part name="fault" element="tns:JsonProcessingException"/>
   </message>
-  <message name="InsertarReserva">
-    <part name="parameters" element="tns:InsertarReservaRequest"/>
-  </message>
-  <message name="InsertarReservaResponse">
-    <part name="parameters" element="tns:InsertarReservaResponse"/>
-  </message>
   <portType name="Restaurante2">
+    <operation name="ModificarReserva">
+      <input wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/ModificarReservaRequest" message="tns:ModificarReserva"/>
+      <output wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/ModificarReservaResponse" message="tns:ModificarReservaResponse"/>
+    </operation>
+    <operation name="confirmarReserva">
+      <input wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/confirmarReservaRequest" message="tns:confirmarReserva"/>
+      <output wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/confirmarReservaResponse" message="tns:confirmarReservaResponse"/>
+    </operation>
+    <operation name="registrarClicks">
+      <input wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/registrarClicksRequest" message="tns:registrarClicks"/>
+      <output wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/registrarClicksResponse" message="tns:registrarClicksResponse"/>
+    </operation>
     <operation name="ConsultarDisponibilidad">
       <input wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/ConsultarDisponibilidadRequest" message="tns:ConsultarDisponibilidad"/>
       <output wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/ConsultarDisponibilidadResponse" message="tns:ConsultarDisponibilidadResponse"/>
+    </operation>
+    <operation name="cancelarReserva">
+      <input wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/cancelarReservaRequest" message="tns:cancelarReserva"/>
+      <output wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/cancelarReservaResponse" message="tns:cancelarReservaResponse"/>
+    </operation>
+    <operation name="obtenerPromociones">
+      <input wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/obtenerPromocionesRequest" message="tns:obtenerPromociones"/>
+      <output wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/obtenerPromocionesResponse" message="tns:obtenerPromocionesResponse"/>
     </operation>
     <operation name="GetInfoRestaurante">
       <input wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/GetInfoRestauranteRequest" message="tns:GetInfoRestaurante"/>
       <output wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/GetInfoRestauranteResponse" message="tns:GetInfoRestauranteResponse"/>
       <fault message="tns:JsonProcessingException" name="JsonProcessingException" wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/GetInfoRestaurante/Fault/JsonProcessingException"/>
     </operation>
-    <operation name="InsertarReserva">
-      <input wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/InsertarReservaRequest" message="tns:InsertarReserva"/>
-      <output wsam:Action="http://services.restaurante2.das.ubp.edu.ar/Restaurante2/InsertarReservaResponse" message="tns:InsertarReservaResponse"/>
-    </operation>
   </portType>
   <binding name="Restaurante2PortBinding" type="tns:Restaurante2">
     <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+    <operation name="ModificarReserva">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="confirmarReserva">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="registrarClicks">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
     <operation name="ConsultarDisponibilidad">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="cancelarReserva">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="obtenerPromociones">
       <soap:operation soapAction=""/>
       <input>
         <soap:body use="literal"/>
@@ -64,15 +149,6 @@
       <fault name="JsonProcessingException">
         <soap:fault name="JsonProcessingException" use="literal"/>
       </fault>
-    </operation>
-    <operation name="InsertarReserva">
-      <soap:operation soapAction=""/>
-      <input>
-        <soap:body use="literal"/>
-      </input>
-      <output>
-        <soap:body use="literal"/>
-      </output>
     </operation>
   </binding>
   <service name="Restaurante2">

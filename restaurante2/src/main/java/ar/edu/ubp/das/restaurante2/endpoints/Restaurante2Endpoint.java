@@ -20,21 +20,19 @@ public class Restaurante2Endpoint {
     @Autowired
     private Restaurante2 service;
 
-        @PayloadRoot(namespace = NAMESPACE_URI, localPart =
-            "InsertarReservaRequest")
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "confirmarReservaRequest")
     @ResponsePayload
-    public InsertarReservaResponse insertarReserva(@RequestPayload
-                                                       InsertarReserva request) {
+    public ConfirmarReservaResponse confirmarReserva(@RequestPayload ConfirmarReserva request) {
         ReservaBean reserva = request.getReserva();
-        String codigoReserva = service.insertarReserva(reserva);
-
-        InsertarReservaResponse response = new InsertarReservaResponse();
+        String codigoReserva = service.confirmarReserva(reserva);
+        ConfirmarReservaResponse response = new ConfirmarReservaResponse();
         response.setCodigoReserva(codigoReserva);
+
         return response;
     }
 
-        @PayloadRoot(namespace = NAMESPACE_URI, localPart =
-            "ConsultarDisponibilidadRequest")
+
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "ConsultarDisponibilidadRequest")
     @ResponsePayload
     public ConsultarDisponibilidadResponse consultarDisponibilidad(@RequestPayload ConsultarDisponibilidad request) {
         SoliHorarioBean soliHorarioBean = request.getSoliHorario();
@@ -53,9 +51,9 @@ public class Restaurante2Endpoint {
         return response;
     }
 
-       @PayloadRoot(namespace = NAMESPACE_URI, localPart =
-            "GetInfoRestauranteRequest")
-        @ResponsePayload
+
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "GetInfoRestauranteRequest")
+    @ResponsePayload
     public GetInfoRestauranteResponse getRestaurante(@RequestPayload GetInfoRestauranteRequest request) throws JsonProcessingException {
 
             int id = request.getId();
@@ -64,65 +62,54 @@ public class Restaurante2Endpoint {
             GetInfoRestauranteResponse response = new GetInfoRestauranteResponse();
             response.setInfoRestaurante(restaurante);
             return response;
-        }
+    }
 
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "ModificarReservaRequest")
+    @ResponsePayload
+    public ModificarReservaResponse modificarReserva(@RequestPayload ModificarReserva request) {
 
+        ModificarReservaReqBean req = request.getModificarReserva();
+        ResponseBean resp = service.modificarReserva(req);
+        ModificarReservaResponse response = new ModificarReservaResponse();
+        response.setResponse(resp);
 
+        return response;
+    }
 
-//    @PayloadRoot(namespace = NAMESPACE_URI, localPart =
-//            "ObtenerPaisesRequest")
-//    @ResponsePayload
-//    public ObtenerPaisesResponse obtenerPaises(@RequestPayload
-//                                               ObtenerPaises request) {
-//        List<PaisBean> paises = service.obtenerPaises();
-//
-//        ObtenerPaisesResponse response = new ObtenerPaisesResponse();
-//        response.setPaisesResponse(paises);
-//        return response;
-//    }
-//
-//    @PayloadRoot(namespace = NAMESPACE_URI, localPart =
-//            "ObtenerProvinciasRequest")
-//    @ResponsePayload
-//    public ObtenerProvinciasResponse obtenerProvincias(@RequestPayload
-//                                                       ObtenerProvincias request) {
-//        String codPais = request.getCodPais();
-//        List<ProvinciaBean> provincias =
-//                service.obtenerProvincias(codPais);
-//
-//        ObtenerProvinciasResponse response = new
-//                ObtenerProvinciasResponse();
-//        response.setProvinciasResponse(provincias);
-//        return response;
-//    }
-//
-//    @PayloadRoot(namespace = NAMESPACE_URI, localPart =
-//            "ObtenerLocalidadesRequest")
-//    @ResponsePayload
-//    public ObtenerLocalidadesResponse obtenerLocalidades(@RequestPayload
-//                                                         ObtenerLocalidades request) {
-//        LocalidadCriteriaBean criteria = request.getCriteria();
-//        List<LocalidadBean> localidades =
-//                service.obtenerLocalidades(criteria);
-//
-//        ObtenerLocalidadesResponse response = new
-//                ObtenerLocalidadesResponse();
-//        response.setLocalidadesResponse(localidades);
-//        return response;
-//    }
-//
-//    @PayloadRoot(namespace = NAMESPACE_URI, localPart =
-//            "InsertarLocalidadRequest")
-//    @ResponsePayload
-//    public InsertarLocalidadResponse insertarLocalidad(@RequestPayload
-//                                                       InsertarLocalidad request) {
-//        LocalidadBean localidad = request.getLocalidad();
-//        LocalidadBean insertedLocalidad =
-//                service.insertarLocalidad(localidad);
-//
-//        InsertarLocalidadResponse response = new
-//                InsertarLocalidadResponse();
-//        response.setLocalidadResponse(insertedLocalidad);
-//        return response;
-//    }
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "cancelarReservaRequest")
+    @ResponsePayload
+    public CancelarReservaResponse cancelarReserva(@RequestPayload CancelarReserva request) {
+
+        CancelarReservaReqBean req = request.getCancelarReserva();
+        ResponseBean resp = service.cancelarReserva(req);
+        CancelarReservaResponse response = new CancelarReservaResponse();
+        response.setResponse(resp);
+
+        return response;
+    }
+
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "registrarClicksRequest")
+    @ResponsePayload
+    public RegistrarClicksResponse registrarClicks(@RequestPayload RegistrarClicks request) {
+
+        List<SoliClickBean> clicks = request.getClicks();
+        ResponseBean resp = service.registrarClicks(clicks);
+        RegistrarClicksResponse response = new RegistrarClicksResponse();
+        response.setResponse(resp);
+
+        return response;
+    }
+
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "obtenerPromocionesRequest")
+    @ResponsePayload
+    public ObtenerPromocionesResponse obtenerPromociones(@RequestPayload ObtenerPromociones request) {
+
+        ObtenerPromocionesReqBean req = request.getObtenerPromociones();
+        List<ContenidoBean> promociones = service.obtenerPromociones(req);
+        ObtenerPromocionesResponse response = new ObtenerPromocionesResponse();
+        response.setPromociones(promociones);
+
+        return response;
+    }
+
 }

@@ -1,8 +1,5 @@
 package ar.edu.ubp.das.restaurante2.services;
-import ar.edu.ubp.das.restaurante2.beans.HorarioBean;
-import ar.edu.ubp.das.restaurante2.beans.ReservaBean;
-import ar.edu.ubp.das.restaurante2.beans.RestauranteBean;
-import ar.edu.ubp.das.restaurante2.beans.SoliHorarioBean;
+import ar.edu.ubp.das.restaurante2.beans.*;
 import ar.edu.ubp.das.restaurante2.repositories.Restaurante2Repository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.jws.WebMethod;
@@ -23,11 +20,11 @@ public class Restaurante2 {
     @Autowired
     private Restaurante2Repository restaurante2Repository;
 
-    @WebMethod(operationName = "InsertarReserva")
-    @RequestWrapper(localName = "InsertarReservaRequest")
-    @ResponseWrapper(localName = "InsertarReservaResponse")
+    @WebMethod(operationName = "confirmarReserva")
+    @RequestWrapper(localName = "confirmarReservaRequest")
+    @ResponseWrapper(localName = "confirmarReservaResponse")
     @WebResult(name = "CodigoReserva")
-    public String insertarReserva(@WebParam(name = "Reserva")
+    public String confirmarReserva(@WebParam(name = "Reserva")
                                   ReservaBean reserva) {
         return restaurante2Repository.insReserva(reserva);
     }
@@ -48,6 +45,56 @@ public class Restaurante2 {
     public RestauranteBean getRestaurante(@WebParam(name = "id", targetNamespace = "http://services.restaurante2.das.ubp.edu.ar/") int id) throws JsonProcessingException {
         return restaurante2Repository.getInfoRestaurante(id);
     }
+
+    @WebMethod(operationName = "ModificarReserva")
+    @RequestWrapper(localName = "ModificarReservaRequest")
+    @ResponseWrapper(localName = "ModificarReservaResponse")
+    @WebResult(name = "Response")
+    public ResponseBean modificarReserva(
+            @WebParam(name = "ModificarReserva") ModificarReservaReqBean req) {
+
+        return restaurante2Repository.modificarReserva(req);
+    }
+
+    @WebMethod(operationName = "cancelarReserva")
+    @RequestWrapper(localName = "cancelarReservaRequest")
+    @ResponseWrapper(localName = "cancelarReservaResponse")
+    @WebResult(name = "Response")
+    public ResponseBean cancelarReserva(
+            @WebParam(name = "CancelarReserva")
+            CancelarReservaReqBean req) {
+
+        return restaurante2Repository
+                .cancelarReservaPorCodigoSucursal(
+                        req.getCodReservaSucursal()
+                );
+    }
+
+    @WebMethod(operationName = "registrarClicks")
+    @RequestWrapper(localName = "registrarClicksRequest")
+    @ResponseWrapper(localName = "registrarClicksResponse")
+    @WebResult(name = "Response")
+    public ResponseBean registrarClicks(
+            @WebParam(name = "Clicks")
+            List<SoliClickBean> clicks) {
+
+        return restaurante2Repository.registrarClicks(clicks);
+    }
+
+    @WebMethod(operationName = "obtenerPromociones")
+    @RequestWrapper(localName = "obtenerPromocionesRequest")
+    @ResponseWrapper(localName = "obtenerPromocionesResponse")
+    @WebResult(name = "Promociones")
+    public List<ContenidoBean> obtenerPromociones(
+            @WebParam(name = "ObtenerPromociones")
+            ObtenerPromocionesReqBean req) {
+
+        return restaurante2Repository.getPromociones(req.getId());
+    }
+
+
+
+
 
 
 //

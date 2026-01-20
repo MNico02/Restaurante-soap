@@ -1,6 +1,7 @@
 package ar.edu.ubp.das.restaurante2.components;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -57,5 +58,18 @@ public class SimpleJdbcCallFactory {
         return new SimpleJdbcCall(jdbcTpl)
                 .withProcedureName(procedureName)
                 .withSchemaName(schemaName);
+    }
+
+    public List<Map<String, Object>> executeQueryAsMap(
+            String procedureName,
+            String schemaName,
+            SqlParameterSource params,
+            String resultSetName) {
+
+        SimpleJdbcCall jdbcCall = createCall(procedureName, schemaName)
+                .returningResultSet(resultSetName, new ColumnMapRowMapper());
+
+        Map<String, Object> out = jdbcCall.execute(params);
+        return (List<Map<String, Object>>) out.get(resultSetName);
     }
 }

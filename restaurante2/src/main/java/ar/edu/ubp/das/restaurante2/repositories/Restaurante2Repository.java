@@ -193,6 +193,193 @@ public class Restaurante2Repository {
         return restaurante;
     }
 
+    public ResponseBean modificarReserva(ModificarReservaReqBean data) {
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("cod_reserva_sucursal", data.getCodReservaSucursal(), Types.VARCHAR)
+                .addValue("fecha_reserva", java.sql.Date.valueOf(data.getFechaReserva()), Types.DATE)
+                .addValue("hora_reserva", java.sql.Time.valueOf(data.getHoraReserva()), Types.TIME)
+                .addValue("cod_zona", data.getCodZona(), Types.INTEGER)
+                .addValue("cant_adultos", data.getCantAdultos(), Types.INTEGER)
+                .addValue("cant_menores", data.getCantMenores(), Types.INTEGER);
+
+        try {
+            Map<String, Object> out =
+                    jdbcCallFactory.executeWithOutputs(
+                            "modificar_reserva_por_codigo_sucursal",
+                            "dbo",
+                            params
+                    );
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> rs =
+                    (List<Map<String, Object>>) out.get("#result-set-1");
+
+            if (rs == null || rs.isEmpty()) {
+                return new ResponseBean(false, "ERROR",
+                        "El SP no devolvió resultado (#result-set-1 vacío).");
+            }
+
+            Map<String, Object> row = rs.get(0);
+
+            boolean success = false;
+            Object vSuccess = row.get("success");
+            if (vSuccess instanceof Boolean) success = (Boolean) vSuccess;
+            else if (vSuccess instanceof Number)
+                success = ((Number) vSuccess).intValue() == 1;
+            else if (vSuccess != null)
+                success = "1".equals(vSuccess.toString())
+                        || "true".equalsIgnoreCase(vSuccess.toString());
+
+            String status = row.get("status") != null
+                    ? row.get("status").toString()
+                    : null;
+
+            String message = row.get("message") != null
+                    ? row.get("message").toString()
+                    : null;
+
+            return new ResponseBean(success, status, message);
+
+        } catch (Exception e) {
+            return new ResponseBean(false, "ERROR", e.getMessage());
+        }
+    }
+
+    public ResponseBean cancelarReservaPorCodigoSucursal(String codReservaSucursal) {
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("cod_reserva_sucursal", codReservaSucursal);
+
+        List<Map<String, Object>> rs = jdbcCallFactory.executeQueryAsMap(
+                "cancelar_reserva_por_codigo_sucursal",
+                "dbo",
+                params,
+                "result"
+        );
+
+        if (rs.isEmpty()) {
+            return new ResponseBean(
+                    false,
+                    "ERROR",
+                    "SP no devolvió resultado."
+            );
+        }
+
+        Map<String, Object> row = rs.get(0);
+
+        boolean success = false;
+        Object vSuccess = row.get("success");
+        if (vSuccess instanceof Boolean) success = (Boolean) vSuccess;
+        else if (vSuccess instanceof Number)
+            success = ((Number) vSuccess).intValue() == 1;
+        else if (vSuccess != null)
+            success = "1".equals(vSuccess.toString())
+                    || "true".equalsIgnoreCase(vSuccess.toString());
+
+        String status = row.get("status") != null
+                ? row.get("status").toString()
+                : null;
+
+        String message = row.get("message") != null
+                ? row.get("message").toString()
+                : null;
+
+        return new ResponseBean(success, status, message);
+    }
+
+    public ResponseBean registrarClicks(List<SoliClickBean> clicks) {
+
+        try {
+            for (SoliClickBean c : clicks) {
+                insClick(c);
+            }
+            return new ResponseBean(
+                    true,
+                    "OK",
+                    "Click registrado correctamente"
+            );
+        } catch (Exception e) {
+            return new ResponseBean(
+                    false,
+                    "ERROR",
+                    "Error al registrar click: " + e.getMessage()
+            );
+        }
+    }
+
+    private void insClick(SoliClickBean data) {
+
+        ContenidoKey key = parseCodContenidoRestauranteSplit(
+                data.getCodContenidoRestaurante()
+        );
+
+        Integer nroContenido   = key.nroContenido();
+        Integer nroRestaurante = key.nroRestaurante();
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("nro_restaurante", nroRestaurante, Types.INTEGER)
+                .addValue("nro_contenido", nroContenido, Types.INTEGER)
+                .addValue("correo_cliente", data.getCorreo_cliente(), Types.VARCHAR)
+                .addValue("fecha_hora_registro", null, Types.TIMESTAMP);
+
+        jdbcCallFactory.execute(
+                "sp_clicks_contenidos_insertar",
+                "dbo",
+                params
+        );
+    }
+
+    /** "123-45" -> (nroContenido=123, nroRestaurante=45) */
+    public static ContenidoKey parseCodContenidoRestauranteSplit(String code) {
+        if (code == null) throw new IllegalArgumentException("code null");
+        String[] parts = code.trim().split("-", 2); // límite 2
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Formato inválido: esperado 'contenido-restaurante'. Recibido: " + code);
+        }
+        int nroContenido   = Integer.parseInt(parts[0].trim());
+        int nroRestaurante = Integer.parseInt(parts[1].trim());
+        return new ContenidoKey(nroContenido, nroRestaurante);
+    }
+    public record ContenidoKey(int nroContenido, int nroRestaurante) {}
+
+    public List<ContenidoBean> getPromociones(int nroRestaurante) {
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("nro_restaurante", nroRestaurante, Types.INTEGER);
+
+        Map<String, Object> out =
+                jdbcCallFactory.executeWithOutputs(
+                        "get_contenidos",
+                        "dbo",
+                        params
+                );
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> rs =
+                (List<Map<String, Object>>) out.get("#result-set-1");
+
+        List<ContenidoBean> contenidos = new ArrayList<>();
+
+        if (rs != null) {
+            for (Map<String, Object> row : rs) {
+                ContenidoBean c = new ContenidoBean();
+                c.setNroSucursal(getIntObj(row.get("nro_sucursal")));
+                c.setNroContenido(getInt(row.get("nro_contenido")));
+                c.setContenidoAPublicar(getStr(row.get("contenido_a_publicar")));
+                c.setImagenAPublicar(getStr(row.get("imagen_a_publicar")));
+                c.setPublicado(true);
+                c.setCostoClick(getBigDec(row.get("costo_click")));
+                contenidos.add(c);
+            }
+        }
+
+        return contenidos;
+    }
+
+
+
+
     // --------- helpers de mapeo seguros ---------
 
     @SuppressWarnings("unchecked")
