@@ -23,6 +23,10 @@
 
   <xs:element name="confirmarReservaResponse" type="tns:confirmarReservaResponse"/>
 
+  <xs:element name="notificarRestauranteRequest" type="tns:notificarRestauranteRequest"/>
+
+  <xs:element name="notificarRestauranteResponse" type="tns:notificarRestauranteResponse"/>
+
   <xs:element name="obtenerPromocionesRequest" type="tns:obtenerPromocionesRequest"/>
 
   <xs:element name="obtenerPromocionesResponse" type="tns:obtenerPromocionesResponse"/>
@@ -94,16 +98,16 @@
 
   <xs:complexType name="ConsultarDisponibilidadRequest">
     <xs:sequence>
-      <xs:element name="soliHorario" type="tns:soliHorarioBean" minOccurs="0"/>
+      <xs:element name="soliHorario" type="tns:SoliHorario" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="soliHorarioBean">
+  <xs:complexType name="SoliHorario">
     <xs:sequence>
-      <xs:element name="cantComensales" type="xs:int"/>
+      <xs:element name="idSucursal" type="xs:int"/>
       <xs:element name="codZona" type="xs:int"/>
       <xs:element name="fecha" type="xs:string" minOccurs="0"/>
-      <xs:element name="idSucursal" type="xs:int"/>
+      <xs:element name="cantComensales" type="xs:int"/>
       <xs:element name="menores" type="xs:boolean"/>
     </xs:sequence>
   </xs:complexType>
@@ -123,29 +127,81 @@
 
   <xs:complexType name="confirmarReservaRequest">
     <xs:sequence>
-      <xs:element name="Reserva" type="tns:reservaBean" minOccurs="0"/>
+      <xs:element name="reservaRestaurante" type="tns:reservaRestauranteBean" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="reservaBean">
+  <xs:complexType name="reservaRestauranteBean">
     <xs:sequence>
-      <xs:element name="apellido" type="xs:string" minOccurs="0"/>
+      <xs:element name="reserva" type="tns:reservaSolicitudBean" minOccurs="0"/>
+      <xs:element name="solicitudCliente" type="tns:solicitudClienteBean" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="reservaSolicitudBean">
+    <xs:sequence>
       <xs:element name="cantAdultos" type="xs:int"/>
       <xs:element name="cantMenores" type="xs:int"/>
+      <xs:element name="codSucursalRestaurante" type="xs:string" minOccurs="0"/>
       <xs:element name="codZona" type="xs:int"/>
       <xs:element name="correo" type="xs:string" minOccurs="0"/>
       <xs:element name="costoReserva" type="xs:float"/>
       <xs:element name="fechaReserva" type="xs:string" minOccurs="0"/>
       <xs:element name="horaReserva" type="xs:string" minOccurs="0"/>
       <xs:element name="idSucursal" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="solicitudClienteBean">
+    <xs:sequence>
+      <xs:element name="apellido" type="xs:string" minOccurs="0"/>
+      <xs:element name="correo" type="xs:string" minOccurs="0"/>
       <xs:element name="nombre" type="xs:string" minOccurs="0"/>
-      <xs:element name="telefono" type="xs:string" minOccurs="0"/>
+      <xs:element name="telefonos" type="xs:string" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="confirmarReservaResponse">
     <xs:sequence>
-      <xs:element name="CodigoReserva" type="xs:string" minOccurs="0"/>
+      <xs:element name="ReservaResponse" type="tns:confirmarReservaResp" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="confirmarReservaResp">
+    <xs:sequence>
+      <xs:element name="codReserva" type="xs:string" minOccurs="0"/>
+      <xs:element name="estado" type="xs:string" minOccurs="0"/>
+      <xs:element name="mensaje" type="xs:string" minOccurs="0"/>
+      <xs:element name="success" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="notificarRestauranteRequest">
+    <xs:sequence>
+      <xs:element name="NotiRestReqBean" type="tns:notiRestReqBean" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="notiRestReqBean">
+    <xs:sequence>
+      <xs:element name="costoAplicado" type="xs:decimal" minOccurs="0"/>
+      <xs:element name="nroContenidos" type="xs:string" minOccurs="0"/>
+      <xs:element name="nroRestaurante" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="notificarRestauranteResponse">
+    <xs:sequence>
+      <xs:element name="Notificacion" type="tns:updPublicarContenidosRespBean" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="updPublicarContenidosRespBean">
+    <xs:sequence>
+      <xs:element name="costoAplicado" type="xs:decimal" minOccurs="0"/>
+      <xs:element name="registrosActualizados" type="xs:int" minOccurs="0"/>
+      <xs:element name="registrosSolicitados" type="xs:int" minOccurs="0"/>
+      <xs:element name="resultado" type="xs:string" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -210,7 +266,9 @@
       <xs:element name="telefonos" type="xs:string" minOccurs="0"/>
       <xs:element name="tiposComidas" type="tns:tipoComidaBean" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="totalComensales" type="xs:int"/>
+      <xs:element name="turnos" type="tns:turnoBean" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="zonas" type="tns:zonaBean" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="zonasTurnos" type="tns:zonaTurnoBean" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -238,12 +296,28 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="turnoBean">
+    <xs:sequence>
+      <xs:element name="habilitado" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="horaDesde" type="xs:string" minOccurs="0"/>
+      <xs:element name="horaHasta" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="zonaBean">
     <xs:sequence>
       <xs:element name="cantComensales" type="xs:int"/>
       <xs:element name="codZona" type="xs:int"/>
       <xs:element name="habilitada" type="xs:boolean"/>
       <xs:element name="nomZona" type="xs:string" minOccurs="0"/>
+      <xs:element name="permiteMenores" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="zonaTurnoBean">
+    <xs:sequence>
+      <xs:element name="codZona" type="xs:int"/>
+      <xs:element name="horaDesde" type="xs:string" minOccurs="0"/>
       <xs:element name="permiteMenores" type="xs:boolean"/>
     </xs:sequence>
   </xs:complexType>
@@ -273,6 +347,7 @@
       <xs:element name="cantMenores" type="xs:int"/>
       <xs:element name="codReservaSucursal" type="xs:string" minOccurs="0"/>
       <xs:element name="codZona" type="xs:int"/>
+      <xs:element name="costoReserva" type="xs:decimal" minOccurs="0"/>
       <xs:element name="fechaReserva" type="xs:string" minOccurs="0"/>
       <xs:element name="horaReserva" type="xs:string" minOccurs="0"/>
     </xs:sequence>

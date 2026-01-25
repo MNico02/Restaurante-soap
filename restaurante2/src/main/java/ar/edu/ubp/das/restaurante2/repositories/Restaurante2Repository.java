@@ -2,6 +2,9 @@ package ar.edu.ubp.das.restaurante2.repositories;
 import ar.edu.ubp.das.restaurante2.beans.*;
 import ar.edu.ubp.das.restaurante2.components.SimpleJdbcCallFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -21,6 +24,13 @@ public class Restaurante2Repository {
     private SimpleJdbcCallFactory jdbcCallFactory;
 
     public String insReserva(ReservaBean data) {
+        String horaString = data.getHoraReserva();
+
+        // VALIDAR antes de convertir
+        if (horaString == null || horaString.trim().isEmpty()) {
+            throw new IllegalArgumentException("La hora de reserva no puede ser null o vacía");
+        }
+
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("nro_cliente", null, Types.INTEGER)
                 .addValue("apellido", data.getApellido())
@@ -30,7 +40,7 @@ public class Restaurante2Repository {
                 .addValue("cod_reserva", null, Types.OTHER)                 // UUID -> OTHER, se ignora en el SP
                 .addValue("fecha_reserva", java.sql.Date.valueOf(data.getFechaReserva()), Types.DATE)
                 .addValue("hora_reserva",  java.sql.Time.valueOf(data.getHoraReserva()),  Types.TIME) // asegurate que venga "HH:mm:00"
-                .addValue("nro_restaurante", 2, Types.INTEGER)
+                .addValue("nro_restaurante", 1, Types.INTEGER)
                 .addValue("nro_sucursal", data.getIdSucursal(), Types.INTEGER)
                 .addValue("cod_zona", data.getCodZona(), Types.INTEGER)
                 .addValue("cant_adultos", data.getCantAdultos(), Types.INTEGER)
@@ -52,9 +62,10 @@ public class Restaurante2Repository {
         }
         return null; // o lanzar excepción si preferís
     }
+
     public List<HorarioBean> getHorarios(SoliHorarioBean data) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("nro_restaurante", 2, Types.INTEGER)
+                .addValue("nro_restaurante", 1, Types.INTEGER)
                 .addValue("nro_sucursal", data.getIdSucursal(), Types.INTEGER)
                 .addValue("cod_zona", data.getCodZona(), Types.INTEGER)
                 .addValue("fecha",java.sql.Date.valueOf(data.getFecha()), Types.DATE)
@@ -66,6 +77,7 @@ public class Restaurante2Repository {
     public RestauranteBean getInfoRestaurante(int nroRestaurante) throws JsonProcessingException {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("nro_restaurante", nroRestaurante, Types.INTEGER);
+
         Map<String, Object> out =
                 jdbcCallFactory.executeWithOutputs("get_info_restaurante_rs", "dbo", params);
 
@@ -79,22 +91,17 @@ public class Restaurante2Repository {
         restaurante.setRazonSocial(getStr(r1.get("razon_social")));
         restaurante.setCuit(getStr(r1.get("cuit")));
 
-        // 2) Contenidos generales del restaurante
+        // OJO: ya no cargamos contenidos acá
+        restaurante.setContenidos(new ArrayList<>());
+
+        // 2) Sucursales
         List<Map<String, Object>> rs2 = castRS(out.get("#result-set-2"));
-        List<ContenidoBean> contenidosRest = new ArrayList<>();
+        Map<Integer, SucursalBean> sucursalesMap = new LinkedHashMap<>();
+
         if (rs2 != null) {
             for (Map<String, Object> row : rs2) {
-                contenidosRest.add(mapContenido(row, null));
-            }
-        }
-        restaurante.setContenidos(contenidosRest);
-
-        // 3) Sucursales
-        List<Map<String, Object>> rs3 = castRS(out.get("#result-set-3"));
-        Map<Integer, SucursalBean> sucursalesMap = new LinkedHashMap<>();
-        if (rs3 != null) {
-            for (Map<String, Object> row : rs3) {
                 int nroSuc = getInt(row.get("nro_sucursal"));
+
                 SucursalBean s = new SucursalBean();
                 s.setNroSucursal(nroSuc);
                 s.setNomSucursal(getStr(row.get("nom_sucursal")));
@@ -111,39 +118,67 @@ public class Restaurante2Repository {
                 s.setMinTolerenciaReserva(getInt(row.get("min_tolerencia_reserva")));
                 s.setNroCategoria(getInt(row.get("nro_categoria")));
                 s.setCategoriaPrecio(getStr(row.get("categoria_precio")));
-                s.setContenidos(new ArrayList<>());
+
+                // Colecciones
+                s.setContenidos(new ArrayList<>());      // queda vacío, se carga por otro SP
                 s.setZonas(new ArrayList<>());
+                s.setTurnos(new ArrayList<>());          // IMPORTANTE: tu SucursalBean debe tenerlo
+                s.setZonasTurnos(new ArrayList<>());     // idem
                 s.setEstilos(new ArrayList<>());
                 s.setEspecialidades(new ArrayList<>());
                 s.setTiposComidas(new ArrayList<>());
+
                 sucursalesMap.put(nroSuc, s);
             }
         }
 
-        // 4) Contenidos por sucursal
-        List<Map<String, Object>> rs4 = castRS(out.get("#result-set-4"));
-        if (rs4 != null) {
-            for (Map<String, Object> row : rs4) {
-                Integer nroSuc = getIntObj(row.get("nro_sucursal"));
-                ContenidoBean c = mapContenido(row, nroSuc);
-                SucursalBean s = sucursalesMap.get(nroSuc);
-                if (s != null) s.getContenidos().add(c);
-            }
-        }
-
-        // 5) Zonas por sucursal
-        List<Map<String, Object>> rs5 = castRS(out.get("#result-set-5"));
-        if (rs5 != null) {
-            for (Map<String, Object> row : rs5) {
+        // 3) Zonas por sucursal
+        List<Map<String, Object>> rs3 = castRS(out.get("#result-set-3"));
+        if (rs3 != null) {
+            for (Map<String, Object> row : rs3) {
                 int nroSuc = getInt(row.get("nro_sucursal"));
+
                 ZonaBean z = new ZonaBean();
                 z.setCodZona(getInt(row.get("cod_zona")));
                 z.setNomZona(getStr(row.get("nom_zona")));
                 z.setCantComensales(getInt(row.get("cant_comensales")));
                 z.setPermiteMenores(getBool(row.get("permite_menores")));
                 z.setHabilitada(getBool(row.get("habilitada")));
+
                 SucursalBean s = sucursalesMap.get(nroSuc);
                 if (s != null) s.getZonas().add(z);
+            }
+        }
+
+        // 4) Turnos por sucursal
+        List<Map<String, Object>> rs4 = castRS(out.get("#result-set-4"));
+        if (rs4 != null) {
+            for (Map<String, Object> row : rs4) {
+                int nroSuc = getInt(row.get("nro_sucursal"));
+
+                TurnoBean t = new TurnoBean();
+                t.setHoraDesde(row.get("hora_reserva") != null ? row.get("hora_reserva").toString() : null);
+                t.setHoraHasta(row.get("hora_hasta") != null ? row.get("hora_hasta").toString() : null);
+                t.setHabilitado(getBool(row.get("habilitado")));
+
+                SucursalBean s = sucursalesMap.get(nroSuc);
+                if (s != null) s.getTurnos().add(t);//prueba
+            }
+        }
+
+        // 5) Zonas-Turnos por sucursal
+        List<Map<String, Object>> rs5 = castRS(out.get("#result-set-5"));
+        if (rs5 != null) {
+            for (Map<String, Object> row : rs5) {
+                int nroSuc = getInt(row.get("nro_sucursal"));
+
+                ZonaTurnoBean zt = new ZonaTurnoBean();
+                zt.setCodZona(getInt(row.get("cod_zona")));
+                zt.setHoraDesde(row.get("hora_reserva") != null ? row.get("hora_reserva").toString() : null);
+                zt.setPermiteMenores(getBool(row.get("permite_menores")));
+
+                SucursalBean s = sucursalesMap.get(nroSuc);
+                if (s != null) s.getZonasTurnos().add(zt);
             }
         }
 
@@ -152,10 +187,12 @@ public class Restaurante2Repository {
         if (rs6 != null) {
             for (Map<String, Object> row : rs6) {
                 int nroSuc = getInt(row.get("nro_sucursal"));
+
                 EstiloBean e = new EstiloBean();
                 e.setNroEstilo(getInt(row.get("nro_estilo")));
                 e.setNomEstilo(getStr(row.get("nom_estilo")));
                 e.setHabilitado(getBool(row.get("habilitado")));
+
                 SucursalBean s = sucursalesMap.get(nroSuc);
                 if (s != null) s.getEstilos().add(e);
             }
@@ -166,10 +203,12 @@ public class Restaurante2Repository {
         if (rs7 != null) {
             for (Map<String, Object> row : rs7) {
                 int nroSuc = getInt(row.get("nro_sucursal"));
+
                 EspecialidadBean e = new EspecialidadBean();
                 e.setNroRestriccion(getInt(row.get("nro_restriccion")));
                 e.setNomRestriccion(getStr(row.get("nom_restriccion")));
                 e.setHabilitada(getBool(row.get("habilitada")));
+
                 SucursalBean s = sucursalesMap.get(nroSuc);
                 if (s != null) s.getEspecialidades().add(e);
             }
@@ -180,10 +219,12 @@ public class Restaurante2Repository {
         if (rs8 != null) {
             for (Map<String, Object> row : rs8) {
                 int nroSuc = getInt(row.get("nro_sucursal"));
+
                 TipoComidaBean tc = new TipoComidaBean();
                 tc.setNroTipoComida(getInt(row.get("nro_tipo_comida")));
                 tc.setNomTipoComida(getStr(row.get("nom_tipo_comida")));
                 tc.setHabilitado(getBool(row.get("habilitado")));
+
                 SucursalBean s = sucursalesMap.get(nroSuc);
                 if (s != null) s.getTiposComidas().add(tc);
             }
@@ -193,6 +234,7 @@ public class Restaurante2Repository {
         return restaurante;
     }
 
+
     public ResponseBean modificarReserva(ModificarReservaReqBean data) {
 
         SqlParameterSource params = new MapSqlParameterSource()
@@ -201,44 +243,34 @@ public class Restaurante2Repository {
                 .addValue("hora_reserva", java.sql.Time.valueOf(data.getHoraReserva()), Types.TIME)
                 .addValue("cod_zona", data.getCodZona(), Types.INTEGER)
                 .addValue("cant_adultos", data.getCantAdultos(), Types.INTEGER)
-                .addValue("cant_menores", data.getCantMenores(), Types.INTEGER);
+                .addValue("cant_menores", data.getCantMenores(), Types.INTEGER)
+                .addValue("costo_reserva",data.getCostoReserva(), Types.DECIMAL);
 
         try {
             Map<String, Object> out =
-                    jdbcCallFactory.executeWithOutputs(
-                            "modificar_reserva_por_codigo_sucursal",
-                            "dbo",
-                            params
-                    );
+                    jdbcCallFactory.executeWithOutputs("modificar_reserva_por_codigo_sucursal", "dbo", params);
 
             @SuppressWarnings("unchecked")
-            List<Map<String, Object>> rs =
-                    (List<Map<String, Object>>) out.get("#result-set-1");
+            java.util.List<java.util.Map<String, Object>> rs =
+                    (java.util.List<java.util.Map<String, Object>>) out.get("#result-set-1");
 
             if (rs == null || rs.isEmpty()) {
-                return new ResponseBean(false, "ERROR",
-                        "El SP no devolvió resultado (#result-set-1 vacío).");
+                return new ResponseBean(false, "ERROR", "El SP no devolvió resultado (#result-set-1 vacío).");
             }
 
-            Map<String, Object> row = rs.get(0);
+            java.util.Map<String, Object> row = rs.get(0);
 
+            // success (bit) puede venir como Boolean o Number
             boolean success = false;
             Object vSuccess = row.get("success");
             if (vSuccess instanceof Boolean) success = (Boolean) vSuccess;
-            else if (vSuccess instanceof Number)
-                success = ((Number) vSuccess).intValue() == 1;
-            else if (vSuccess != null)
-                success = "1".equals(vSuccess.toString())
-                        || "true".equalsIgnoreCase(vSuccess.toString());
+            else if (vSuccess instanceof Number) success = ((Number) vSuccess).intValue() == 1;
+            else if (vSuccess != null) success = "1".equals(vSuccess.toString()) || "true".equalsIgnoreCase(vSuccess.toString());
 
-            String status = row.get("status") != null
-                    ? row.get("status").toString()
-                    : null;
+            String status = row.get("status") != null ? row.get("status").toString() : null;
+            String message = row.get("message") != null ? row.get("message").toString() : null;
 
-            String message = row.get("message") != null
-                    ? row.get("message").toString()
-                    : null;
-
+            // ✅ devolvemos tal cual el SP
             return new ResponseBean(success, status, message);
 
         } catch (Exception e) {
@@ -288,46 +320,69 @@ public class Restaurante2Repository {
         return new ResponseBean(success, status, message);
     }
 
-    public ResponseBean registrarClicks(List<SoliClickBean> clicks) {
+    public ResponseBean insClickLote(List<SoliClickBean> clicks) {
+
+        if (clicks == null || clicks.isEmpty()) {
+            return new ResponseBean(false, "ERROR", "No hay clicks para registrar.");
+        }
 
         try {
-            for (SoliClickBean c : clicks) {
-                insClick(c);
+            ObjectMapper mapper = new ObjectMapper();
+            ArrayNode clicksArray = mapper.createArrayNode();
+
+            System.out.println("=== PROCESANDO CLICKS ===");
+            for (SoliClickBean data : clicks) {
+                ContenidoKey key = parseCodContenidoRestauranteSplit(data.getCodContenidoRestaurante());
+
+                System.out.println(String.format(
+                        "Click: Rest=%d, Cont=%d, Correo=%s",
+                        key.nroRestaurante(),
+                        key.nroContenido(),
+                        data.getCorreo_cliente()
+                ));
+
+                ObjectNode clickNode = mapper.createObjectNode();
+                clickNode.put("nro_restaurante", 1);
+                clickNode.put("nro_contenido", key.nroContenido());
+
+                // Manejo correcto de null
+                if (data.getCorreo_cliente() != null && !data.getCorreo_cliente().trim().isEmpty()) {
+                    clickNode.put("correo_cliente", data.getCorreo_cliente());
+                } else {
+                    clickNode.putNull("correo_cliente");
+                }
+
+                clickNode.putNull("fecha_hora_registro");
+
+                clicksArray.add(clickNode);
             }
+
+            String json = mapper.writeValueAsString(clicksArray);
+
+            System.out.println("=== JSON GENERADO ===");
+            System.out.println(json);
+
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("clicks_json", json, Types.NVARCHAR);
+
+            jdbcCallFactory.execute("sp_clicks_contenidos_insertar_lote", "dbo", params);
+
             return new ResponseBean(
                     true,
-                    "OK",
-                    "Click registrado correctamente"
+                    "SUCCESS",
+                    "Se registraron " + clicks.size() + " clicks correctamente."
             );
+
         } catch (Exception e) {
+            System.err.println("ERROR COMPLETO: " + e.getMessage());
+            e.printStackTrace();
+
             return new ResponseBean(
                     false,
                     "ERROR",
-                    "Error al registrar click: " + e.getMessage()
+                    "Error al registrar clicks: " + e.getMessage()
             );
         }
-    }
-
-    private void insClick(SoliClickBean data) {
-
-        ContenidoKey key = parseCodContenidoRestauranteSplit(
-                data.getCodContenidoRestaurante()
-        );
-
-        Integer nroContenido   = key.nroContenido();
-        Integer nroRestaurante = key.nroRestaurante();
-
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("nro_restaurante", nroRestaurante, Types.INTEGER)
-                .addValue("nro_contenido", nroContenido, Types.INTEGER)
-                .addValue("correo_cliente", data.getCorreo_cliente(), Types.VARCHAR)
-                .addValue("fecha_hora_registro", null, Types.TIMESTAMP);
-
-        jdbcCallFactory.execute(
-                "sp_clicks_contenidos_insertar",
-                "dbo",
-                params
-        );
     }
 
     /** "123-45" -> (nroContenido=123, nroRestaurante=45) */
@@ -337,8 +392,8 @@ public class Restaurante2Repository {
         if (parts.length != 2) {
             throw new IllegalArgumentException("Formato inválido: esperado 'contenido-restaurante'. Recibido: " + code);
         }
-        int nroContenido   = Integer.parseInt(parts[0].trim());
-        int nroRestaurante = Integer.parseInt(parts[1].trim());
+        int nroContenido   = Integer.parseInt(parts[1].trim());
+        int nroRestaurante = Integer.parseInt(parts[0].trim());
         return new ContenidoKey(nroContenido, nroRestaurante);
     }
     public record ContenidoKey(int nroContenido, int nroRestaurante) {}
@@ -346,7 +401,7 @@ public class Restaurante2Repository {
     public List<ContenidoBean> getPromociones(int nroRestaurante) {
         //System.out.println(">>> REPO nro_restaurante = [" + nroRestaurante + "]");
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("nro_restaurante", nroRestaurante, Types.INTEGER);
+                .addValue("nro_restaurante", 1, Types.INTEGER);
 
         Map<String, Object> out =
                 jdbcCallFactory.executeWithOutputs(
@@ -368,13 +423,32 @@ public class Restaurante2Repository {
                 c.setNroContenido(getInt(row.get("nro_contenido")));
                 c.setContenidoAPublicar(getStr(row.get("contenido_a_publicar")));
                 c.setImagenAPublicar(getStr(row.get("imagen_a_publicar")));
-                c.setPublicado(true);
+                c.setPublicado(false);
                 c.setCostoClick(getBigDec(row.get("costo_click")));
                 contenidos.add(c);
             }
         }
 
         return contenidos;
+    }
+
+    public UpdPublicarContenidosRespBean notificarContenidos(NotiRestReqBean req){
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("nro_restaurante", req.getNroRestaurante(), Types.INTEGER)
+                .addValue("costo_click",req.getCostoAplicado(),Types.DECIMAL)
+                .addValue("nro_contenidos",req.getNroContenidos(),Types.VARCHAR);
+
+        List<UpdPublicarContenidosRespBean> result =
+                jdbcCallFactory.executeQuery(
+                        "upd_publicar_contenidos_lote",
+                        "dbo",
+                        params,
+                        "resultado",   // nombre del ResultSet
+                        UpdPublicarContenidosRespBean.class
+                );
+
+        return result.isEmpty() ? null : result.get(0);
+
     }
 
 

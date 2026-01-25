@@ -1,9 +1,13 @@
 package ar.edu.ubp.das.restaurante2.endpoints;
 import ar.edu.ubp.das.restaurante2.beans.*;
+import ar.edu.ubp.das.restaurante2.services.ReservaService;
 import ar.edu.ubp.das.restaurante2.services.Restaurante2;
 import ar.edu.ubp.das.restaurante2.services.jaxws.*;
+import ar.edu.ubp.das.restaurante2.services.jaxws.ConfirmarReservaResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
@@ -19,22 +23,24 @@ public class Restaurante2Endpoint {
 
     @Autowired
     private Restaurante2 service;
+    @Autowired
+    private ReservaService reservaService;
+
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "confirmarReservaRequest")
     @ResponsePayload
-    public ConfirmarReservaResponse confirmarReserva(@RequestPayload ConfirmarReserva request) {
-        ReservaBean reserva = request.getReserva();
-        String codigoReserva = service.confirmarReserva(reserva);
-        ConfirmarReservaResponse response = new ConfirmarReservaResponse();
-        response.setCodigoReserva(codigoReserva);
+    public ConfirmarReservaResponse confirmarReserva(@RequestPayload ConfirmarReservaRequest request) {
 
+        ReservaRestauranteBean req = request.getReservaRestaurante();
+        ConfirmarReservaResp resp = reservaService.confirmarReserva(req);
+       ConfirmarReservaResponse response = new ConfirmarReservaResponse();
+       response.setReservaResponse(resp);
         return response;
     }
 
-
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "ConsultarDisponibilidadRequest")
     @ResponsePayload
-    public ConsultarDisponibilidadResponse consultarDisponibilidad(@RequestPayload ConsultarDisponibilidad request) {
+    public ObtenerHorariosResponse consultarDisponibilidad(@RequestPayload ObtenerHorarios request) {
         SoliHorarioBean soliHorarioBean = request.getSoliHorario();
 
         /*System.out.println("=================================");
@@ -45,11 +51,11 @@ public class Restaurante2Endpoint {
         System.out.println("MENORES         = " + soliHorarioBean.isMenores());
         System.out.println("=================================");*/
         List<HorarioBean> horarios = service.obtenerHorarios(soliHorarioBean);
-/*
-            System.out.println(">>> obtenerLocalidades devolvió horarios = " + horarios);
-            System.out.println(">>> size = " + (horarios == null ? "null" : horarios.size()));
-*/
-        ConsultarDisponibilidadResponse response = new ConsultarDisponibilidadResponse();
+
+            /*System.out.println(">>> obtenerLocalidades devolvió horarios = " + horarios);
+            System.out.println(">>> size = " + (horarios == null ? "null" : horarios.size()));*/
+
+        ObtenerHorariosResponse response = new ObtenerHorariosResponse();
             if (horarios == null) {
                 response.setHorariosResponse(new ArrayList<HorarioBean>());
             } else {
@@ -103,6 +109,22 @@ public class Restaurante2Endpoint {
         ResponseBean resp = service.registrarClicks(clicks);
         RegistrarClicksResponse response = new RegistrarClicksResponse();
         response.setResponse(resp);
+
+        return response;
+    }
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "notificarRestauranteRequest")
+    @ResponsePayload
+    public NotificarRestauranteResponse notificarRestaurante(
+            @RequestPayload NotificarRestauranteRequest request) {
+
+        NotiRestReqBean data = request.getNotiRestReqBean();
+
+        UpdPublicarContenidosRespBean result =
+                service.notificarRestaurante(data);
+
+        NotificarRestauranteResponse response =
+                new NotificarRestauranteResponse();
+        response.setNotificacion(result);
 
         return response;
     }

@@ -17,16 +17,27 @@ import java.util.List;
 @WebService(serviceName = "Restaurante2", targetNamespace =
         "http://services.restaurante2.das.ubp.edu.ar/")
 public class Restaurante2 {
+
+
     @Autowired
     private Restaurante2Repository restaurante2Repository;
+    @Autowired
+    private ReservaService reservaService;
 
     @WebMethod(operationName = "confirmarReserva")
-    @RequestWrapper(localName = "confirmarReservaRequest")
-    @ResponseWrapper(localName = "confirmarReservaResponse")
-    @WebResult(name = "CodigoReserva")
-    public String confirmarReserva(@WebParam(name = "Reserva")
-                                  ReservaBean reserva) {
-        return restaurante2Repository.insReserva(reserva);
+    @RequestWrapper( localName = "confirmarReservaRequest",
+            targetNamespace = "http://services.restaurante2.das.ubp.edu.ar/",
+            className = "ar.edu.ubp.das.restaurante2.services.jaxws.ConfirmarReservaRequest"
+    )
+    @ResponseWrapper(
+            localName = "confirmarReservaResponse",
+            targetNamespace = "http://services.restaurante2.das.ubp.edu.ar/",
+            className = "ar.edu.ubp.das.restaurante2.services.jaxws.ConfirmarReservaResponse"
+    )
+    @WebResult(name = "ReservaResponse")
+    public ConfirmarReservaResp confirmarReserva(@WebParam(name = "reservaRestaurante")
+            ReservaRestauranteBean req) {
+       return reservaService.confirmarReserva(req);
     }
 
     @WebMethod(operationName = "ConsultarDisponibilidad")
@@ -78,7 +89,7 @@ public class Restaurante2 {
             @WebParam(name = "Clicks")
             List<SoliClickBean> clicks) {
 
-        return restaurante2Repository.registrarClicks(clicks);
+        return restaurante2Repository.insClickLote(clicks);
     }
 
     @WebMethod(operationName = "obtenerPromociones")
@@ -93,6 +104,26 @@ public class Restaurante2 {
         //System.out.println(">>> SOAP obtenerPromociones ID = [" + req.getId() + "]");
         return restaurante2Repository.getPromociones(req.getId());
     }
+
+    @WebMethod(operationName = "notificarRestaurante")
+    @RequestWrapper(
+            localName = "notificarRestauranteRequest",
+            targetNamespace = "http://services.restaurante2.das.ubp.edu.ar/",
+            className = "ar.edu.ubp.das.restaurante2.services.jaxws.NotificarRestauranteRequest"
+    )
+    @ResponseWrapper(
+            localName = "notificarRestauranteResponse",
+            targetNamespace = "http://services.restaurante2.das.ubp.edu.ar/",
+            className = "ar.edu.ubp.das.restaurante2.services.jaxws.NotificarRestauranteResponse"
+    )
+    @WebResult(name = "Notificacion")
+    public UpdPublicarContenidosRespBean notificarRestaurante(
+            @WebParam(name = "NotiRestReqBean")
+            NotiRestReqBean req
+    ) {
+        return restaurante2Repository.notificarContenidos(req);
+    }
+
 
 
 

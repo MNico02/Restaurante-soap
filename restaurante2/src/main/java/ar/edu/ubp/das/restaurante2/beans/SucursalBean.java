@@ -25,6 +25,24 @@ public class SucursalBean {
     private List<EstiloBean> estilos;
     private List<EspecialidadBean> especialidades;
     private List<TipoComidaBean> tiposComidas;
+    private List<TurnoBean> turnos;
+    private List<ZonaTurnoBean> zonasTurnos;
+
+    public List<TurnoBean> getTurnos() {
+        return turnos;
+    }
+
+    public void setTurnos(List<TurnoBean> turnos) {
+        this.turnos = turnos;
+    }
+
+    public List<ZonaTurnoBean> getZonasTurnos() {
+        return zonasTurnos;
+    }
+
+    public void setZonasTurnos(List<ZonaTurnoBean> zonasTurnos) {
+        this.zonasTurnos = zonasTurnos;
+    }
 
     public int getNroSucursal() { return nroSucursal; }
     public void setNroSucursal(int nroSucursal) { this.nroSucursal = nroSucursal; }
