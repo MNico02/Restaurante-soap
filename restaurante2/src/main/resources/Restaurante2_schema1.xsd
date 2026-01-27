@@ -197,30 +197,7 @@
   </xs:complexType>
 
   <xs:complexType name="updPublicarContenidosRespBean">
-    <xs:sequence>
-      <xs:element name="costoAplicado" type="xs:decimal" minOccurs="0"/>
-      <xs:element name="registrosActualizados" type="xs:int" minOccurs="0"/>
-      <xs:element name="registrosSolicitados" type="xs:int" minOccurs="0"/>
-      <xs:element name="resultado" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="cancelarReservaRequest">
-    <xs:sequence>
-      <xs:element name="CancelarReserva" type="tns:cancelarReservaReqBean" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="cancelarReservaReqBean">
-    <xs:sequence>
-      <xs:element name="codReservaSucursal" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="cancelarReservaResponse">
-    <xs:sequence>
-      <xs:element name="Response" type="tns:responseBean" minOccurs="0"/>
-    </xs:sequence>
+    <xs:sequence/>
   </xs:complexType>
 
   <xs:complexType name="GetInfoRestauranteRequest">
@@ -333,6 +310,24 @@
 
   <xs:complexType name="jsonLocation">
     <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="cancelarReservaRequest">
+    <xs:sequence>
+      <xs:element name="CancelarReserva" type="tns:cancelarReservaReqBean" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="cancelarReservaReqBean">
+    <xs:sequence>
+      <xs:element name="codReservaSucursal" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="cancelarReservaResponse">
+    <xs:sequence>
+      <xs:element name="Response" type="tns:responseBean" minOccurs="0"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="ModificarReservaRequest">

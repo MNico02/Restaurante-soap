@@ -18,7 +18,12 @@ target/
 *.iws
 *.iml
 *.ipr
-
+/target/
+/**/target/
+*.class
+# IntelliJ
+.idea/
+*.iml
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -31,3 +36,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# JAX-WS generado
+/src/main/java/**/services/jaxws/
