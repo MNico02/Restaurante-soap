@@ -440,16 +440,16 @@ VALUES
     (1,1,4,1),(1,1,1,1),
     (1,2,3,1),(1,2,2,1);
 
-/* ============================================
+//* ============================================
    CONTENIDOS PROMOCIONALES — RESTAURANTE 2
    ============================================*/
 
 INSERT INTO dbo.contenidos (nro_restaurante, nro_contenido, contenido_a_publicar, imagen_a_publicar, publicado, costo_click, nro_sucursal)
 VALUES
-    (1,1,N'Nigiri nikkei premium con salsa anticuchera',N'https://img/nigiri.jpg',0,0.15,1),
-    (1,2,N'Roll acevichado fusión – plato estrella',N'https://img/acevichado.jpg',0,0.15,2),
-    (1,3,N'Tataki de atún con reducción de maracuyá',N'https://img/tataki.jpg',0,0.20,2),
-    (1,4,N'sushi aumado',N'https://img/acevichado.jpg',0,0.15,1);
+(1,1,N'Nigiri nikkei premium con salsa anticuchera',N'https://www.800.cl/galeriasitios/Och/2019/11/27/Och__temple4.jpg',0,0.15,1),
+(1,2,N'Roll acevichado fusión – plato estrella',N'https://theobjective.com/wp-content/uploads/2025/03/PORTADA-GASTRONOMIA-BRENDA-2-6-1024x576.jpg',0,0.15,2),
+(1,3,N'Tataki de atún con reducción de maracuyá',N'https://img-global.cpcdn.com/recipes/fe633f06b025af31/1200x630cq80/photo.jpg',0,0.20,2),
+(1,4,N'sushi aumado',N'https://www.ahumadosdominguez.es/wp-content/uploads/2023/07/sushi-salmon-ahumado.jpeg',0,0.15,1);
 GO
 /*
 update contenidos

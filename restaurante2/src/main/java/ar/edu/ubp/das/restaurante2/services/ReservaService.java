@@ -79,7 +79,7 @@ public class ReservaService {
             return resp;
 
         } catch (Exception e) {
-            log.error("Error confirmando reserva: {}", e.getMessage(), e);
+            //log.error("Error confirmando reserva: {}", e.getMessage(), e);
             resp.setSuccess(false);
             resp.setEstado("RECHAZADA");
             resp.setMensaje(e.getMessage());
