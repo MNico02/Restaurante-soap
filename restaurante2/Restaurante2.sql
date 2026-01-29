@@ -635,6 +635,34 @@ SELECT CAST(NULL AS TIME(0)) AS hora_reserva,
 RETURN;
 END
 
+    -- Obtener el tiempo mínimo de tolerancia de la sucursal
+    DECLARE @min_tolerancia INT;
+
+SELECT @min_tolerancia = s.min_tolerencia_reserva
+FROM dbo.sucursales s
+WHERE s.nro_restaurante = @nro_restaurante
+  AND s.nro_sucursal    = @nro_sucursal;
+
+-- Si no se encuentra, usar un valor por defecto (ej: 60 minutos)
+SET @min_tolerancia = ISNULL(@min_tolerancia, 60);
+
+    -- Calcular la hora mínima permitida para reservar
+    DECLARE @hora_minima_reserva TIME(0);
+    DECLARE @fecha_hora_actual DATETIME = GETDATE();
+
+    -- Si la fecha de reserva es HOY, calcular hora mínima
+    -- Si es fecha futura, permitir todos los horarios
+    IF @fecha = CAST(@fecha_hora_actual AS DATE)
+BEGIN
+        -- Hora actual + tolerancia mínima
+        SET @hora_minima_reserva = CAST(DATEADD(MINUTE, @min_tolerancia, @fecha_hora_actual) AS TIME(0));
+END
+ELSE
+BEGIN
+        -- Para fechas futuras, no hay restricción de hora mínima
+        SET @hora_minima_reserva = '00:00:00';
+END
+
     ;WITH Turnos AS (
     /* Turnos válidos para la sucursal y que además estén asociados a la zona */
     SELECT t.nro_restaurante, t.nro_sucursal, t.hora_reserva, t.hora_hasta
@@ -667,7 +695,6 @@ END
                 AND ISNULL(r.cancelada,0) = 0
               GROUP BY r.hora_reserva
           )
-
      SELECT
          t.hora_reserva,
          t.hora_hasta
@@ -680,6 +707,8 @@ END
          (z.cant_comensales - ISNULL(o.ocupados,0)) >= @cant_personas
        -- Si hay menores en la solicitud, la zona debe permitir menores
        AND ( @menores = 0 OR z.permite_menores = 1 )
+       -- *** NUEVA VALIDACIÓN: No mostrar horarios que ya pasaron ***
+       AND t.hora_reserva >= @hora_minima_reserva
      ORDER BY t.hora_reserva;
 END
 GO
