@@ -3,11 +3,8 @@ import ar.edu.ubp.das.restaurante2.beans.*;
 import ar.edu.ubp.das.restaurante2.services.ReservaService;
 import ar.edu.ubp.das.restaurante2.services.Restaurante2;
 import ar.edu.ubp.das.restaurante2.services.jaxws.*;
-import ar.edu.ubp.das.restaurante2.services.jaxws.ConfirmarReservaResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
@@ -31,18 +28,20 @@ public class Restaurante2Endpoint {
     @ResponsePayload
     public ConfirmarReservaResponse confirmarReserva(@RequestPayload ConfirmarReservaRequest request) {
 
-        ReservaRestauranteBean req = request.getReservaRestaurante();
-        ConfirmarReservaResp resp = reservaService.confirmarReserva(req);
-       ConfirmarReservaResponse response = new ConfirmarReservaResponse();
-       response.setReservaResponse(resp);
+        String jsonRequest = request.getJsonRequest();
+
+        String jsonResponse = service.confirmarReserva(jsonRequest);
+
+        ConfirmarReservaResponse response = new ConfirmarReservaResponse();
+        response.setJsonResponse(jsonResponse);
+
         return response;
     }
-
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "ConsultarDisponibilidadRequest")
     @ResponsePayload
     public ObtenerHorariosResponse consultarDisponibilidad(@RequestPayload ObtenerHorarios request) {
-        SoliHorarioBean soliHorarioBean = request.getSoliHorario();
-
+        String jsonRequest = request.getJsonRequest();
+        System.out.println("JSON request: " + jsonRequest);
         /*System.out.println("=================================");
         System.out.println("ID SUCURSAL     = " + soliHorarioBean.getIdSucursal());
         System.out.println("COD ZONA        = " + soliHorarioBean.getCodZona());
@@ -50,17 +49,13 @@ public class Restaurante2Endpoint {
         System.out.println("CANT COMENSALES = " + soliHorarioBean.getCantComensales());
         System.out.println("MENORES         = " + soliHorarioBean.isMenores());
         System.out.println("=================================");*/
-        List<HorarioBean> horarios = service.obtenerHorarios(soliHorarioBean);
+        String jsonResponse = service.obtenerHorarios(jsonRequest);
 
             /*System.out.println(">>> obtenerLocalidades devolvió horarios = " + horarios);
             System.out.println(">>> size = " + (horarios == null ? "null" : horarios.size()));*/
 
         ObtenerHorariosResponse response = new ObtenerHorariosResponse();
-            if (horarios == null) {
-                response.setHorariosResponse(new ArrayList<HorarioBean>());
-            } else {
-                response.setHorariosResponse(horarios);
-            }
+        response.setJsonResponse(jsonResponse);
         return response;
     }
 
@@ -69,22 +64,23 @@ public class Restaurante2Endpoint {
     @ResponsePayload
     public GetInfoRestauranteResponse getRestaurante(@RequestPayload GetInfoRestauranteRequest request) throws JsonProcessingException {
 
-            int id = request.getId();
-            RestauranteBean restaurante = service.getRestaurante(id);
+            String jsonRequest = request.getJsonRequest();
+        System.out.println("JSON request: " + jsonRequest);
+            String jsonResponse = service.getRestaurante(jsonRequest);
 
             GetInfoRestauranteResponse response = new GetInfoRestauranteResponse();
-            response.setInfoRestaurante(restaurante);
+            response.setJsonResponse(jsonResponse);
             return response;
     }
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "ModificarReservaRequest")
     @ResponsePayload
     public ModificarReservaResponse modificarReserva(@RequestPayload ModificarReserva request) {
+        String jsonRequest = request.getJsonRequest();
 
-        ModificarReservaReqBean req = request.getModificarReserva();
-        ResponseBean resp = service.modificarReserva(req);
+        String jsonResponse = service.modificarReserva(jsonRequest);
         ModificarReservaResponse response = new ModificarReservaResponse();
-        response.setResponse(resp);
+        response.setJsonResponse(jsonResponse);
 
         return response;
     }
@@ -92,11 +88,11 @@ public class Restaurante2Endpoint {
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "cancelarReservaRequest")
     @ResponsePayload
     public CancelarReservaResponse cancelarReserva(@RequestPayload CancelarReserva request) {
-
-        CancelarReservaReqBean req = request.getCancelarReserva();
-        ResponseBean resp = service.cancelarReserva(req);
+        String jsonRequest = request.getJsonRequest();
+        System.out.println("JSON request: " + jsonRequest);
+        String jsonResponse = service.cancelarReserva(jsonRequest);
         CancelarReservaResponse response = new CancelarReservaResponse();
-        response.setResponse(resp);
+        response.setJsonResponse(jsonResponse);
 
         return response;
     }
@@ -105,26 +101,22 @@ public class Restaurante2Endpoint {
     @ResponsePayload
     public RegistrarClicksResponse registrarClicks(@RequestPayload RegistrarClicks request) {
 
-        List<SoliClickBean> clicks = request.getClicks();
-        ResponseBean resp = service.registrarClicks(clicks);
+        String jsonRequest = request.getJsonRequest();
+        String jsonResponse = service.registrarClicks(jsonRequest);
         RegistrarClicksResponse response = new RegistrarClicksResponse();
-        response.setResponse(resp);
+        response.setJsonResponse(jsonResponse);
 
         return response;
     }
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "notificarRestauranteRequest")
     @ResponsePayload
-    public NotificarRestauranteResponse notificarRestaurante(
-            @RequestPayload NotificarRestauranteRequest request) {
+    public NotificarRestauranteResponse notificarRestaurante( @RequestPayload NotificarRestauranteRequest request) {
 
-        NotiRestReqBean data = request.getNotiRestReqBean();
-
-        UpdPublicarContenidosRespBean result =
-                service.notificarRestaurante(data);
-
-        NotificarRestauranteResponse response =
-                new NotificarRestauranteResponse();
-        response.setNotificacion(result);
+        String jsonRequest = request.getJsonRequest();
+        System.out.println("JSON request: " + jsonRequest);
+        String jsonResponse = service.notificarRestaurante(jsonRequest);
+        NotificarRestauranteResponse response = new NotificarRestauranteResponse();
+        response.setJsonResponse(jsonResponse);
 
         return response;
     }
@@ -132,12 +124,11 @@ public class Restaurante2Endpoint {
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "obtenerPromocionesRequest")
     @ResponsePayload
     public ObtenerPromocionesResponse obtenerPromociones(@RequestPayload ObtenerPromociones request) {
-
-        ObtenerPromocionesReqBean req = request.getObtenerPromociones();
-        List<ContenidoBean> promociones = service.obtenerPromociones(req);
+        String jsonRequest = request.getJsonRequest();
+        System.out.println("JSON request: " + jsonRequest);
+        String jsonResponse = service.obtenerPromociones(jsonRequest);
         ObtenerPromocionesResponse response = new ObtenerPromocionesResponse();
-        response.setPromociones(promociones);
-
+        response.setJsonResponse(jsonResponse);
         return response;
     }
 

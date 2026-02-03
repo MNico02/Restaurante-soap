@@ -4,7 +4,6 @@ package ar.edu.ubp.das.restaurante2.services;
 
 import ar.edu.ubp.das.restaurante2.beans.*;
 import ar.edu.ubp.das.restaurante2.repositories.Restaurante2Repository;
-import ar.edu.ubp.das.restaurante2.services.jaxws.ConfirmarReservaResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
