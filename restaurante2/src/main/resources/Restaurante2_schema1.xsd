@@ -36,9 +36,7 @@
   <xs:element name="registrarClicksResponse" type="tns:registrarClicksResponse"/>
 
   <xs:complexType name="obtenerPromocionesRequest">
-    <xs:sequence>
-      <xs:element name="jsonRequest" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
+    <xs:sequence/>
   </xs:complexType>
 
   <xs:complexType name="obtenerPromocionesResponse">
@@ -108,9 +106,7 @@
   </xs:complexType>
 
   <xs:complexType name="GetInfoRestauranteRequest">
-    <xs:sequence>
-      <xs:element name="jsonRequest" type="xs:string" form="qualified" minOccurs="0"/>
-    </xs:sequence>
+    <xs:sequence/>
   </xs:complexType>
 
   <xs:complexType name="GetInfoRestauranteResponse">

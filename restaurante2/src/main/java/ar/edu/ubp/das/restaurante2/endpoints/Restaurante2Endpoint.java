@@ -1,6 +1,4 @@
 package ar.edu.ubp.das.restaurante2.endpoints;
-import ar.edu.ubp.das.restaurante2.beans.*;
-import ar.edu.ubp.das.restaurante2.services.ReservaService;
 import ar.edu.ubp.das.restaurante2.services.Restaurante2;
 import ar.edu.ubp.das.restaurante2.services.jaxws.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,8 +8,6 @@ import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Endpoint
 public class Restaurante2Endpoint {
@@ -20,8 +16,8 @@ public class Restaurante2Endpoint {
 
     @Autowired
     private Restaurante2 service;
-    @Autowired
-    private ReservaService reservaService;
+    /*@Autowired
+    private ReservaService reservaService;*/
 
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "confirmarReservaRequest")
@@ -62,11 +58,9 @@ public class Restaurante2Endpoint {
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "GetInfoRestauranteRequest")
     @ResponsePayload
-    public GetInfoRestauranteResponse getRestaurante(@RequestPayload GetInfoRestauranteRequest request) throws JsonProcessingException {
+    public GetInfoRestauranteResponse getRestaurante() throws JsonProcessingException {
 
-            String jsonRequest = request.getJsonRequest();
-        System.out.println("JSON request: " + jsonRequest);
-            String jsonResponse = service.getRestaurante(jsonRequest);
+            String jsonResponse = service.getRestaurante();
 
             GetInfoRestauranteResponse response = new GetInfoRestauranteResponse();
             response.setJsonResponse(jsonResponse);
@@ -123,10 +117,8 @@ public class Restaurante2Endpoint {
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "obtenerPromocionesRequest")
     @ResponsePayload
-    public ObtenerPromocionesResponse obtenerPromociones(@RequestPayload ObtenerPromociones request) {
-        String jsonRequest = request.getJsonRequest();
-        System.out.println("JSON request: " + jsonRequest);
-        String jsonResponse = service.obtenerPromociones(jsonRequest);
+    public ObtenerPromocionesResponse obtenerPromociones() {
+        String jsonResponse = service.obtenerPromociones();
         ObtenerPromocionesResponse response = new ObtenerPromocionesResponse();
         response.setJsonResponse(jsonResponse);
         return response;

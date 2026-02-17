@@ -1,7 +1,7 @@
 package ar.edu.ubp.das.restaurante2.beans;
 
 
-public class ConfirmarReservaResp {
+public class ConfirmarReservaResponse {
     private boolean success;
     private String estado;     // "CONFIRMADA" | "RECHAZADA"
     private String mensaje;

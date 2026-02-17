@@ -464,34 +464,34 @@ set publicado=0 where publicado=1*/
 				sección procedimientos
 -----------------------------------------------------------------*/
 
+
+/*---------------------------------------------------------------
+				sección procedimientos
+-----------------------------------------------------------------*/
+
 go
 CREATE OR ALTER PROCEDURE dbo.ins_cliente_reserva_sucursal
-    -- Cliente (si @nro_cliente es NULL, se inserta usando correo como clave natural)
-    @nro_cliente        INT              = NULL,
-    @apellido           NVARCHAR(80)     = NULL,
-    @nombre             NVARCHAR(80)     = NULL,
-    @correo             NVARCHAR(160)    = NULL,
-    @telefonos          NVARCHAR(80)     = NULL,
-
-    -- Reserva
-    @cod_reserva        UNIQUEIDENTIFIER = NULL,  -- se ignora: la tabla tiene DEFAULT NEWSEQUENTIALID()
-    @fecha_reserva      DATE,
-    @hora_reserva       TIME(0),
-    @nro_restaurante    INT,
-    @nro_sucursal       INT,
-    @cod_zona           INT,
-    @cant_adultos       INT,
-    @cant_menores       INT,
-    @costo_reserva      DECIMAL(12,2)    = 0,
-    @cancelada          BIT              = 0,
-    @fecha_cancelacion  DATE             = NULL,
-
-    -- salida
-    @o_cod_reserva      UNIQUEIDENTIFIER OUTPUT
+    @json NVARCHAR(MAX)
     AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
+
+    DECLARE @nro_cliente        INT              = TRY_CAST(JSON_VALUE(@json, '$.nroCliente')       AS INT);
+    DECLARE @apellido           NVARCHAR(80)     = JSON_VALUE(@json, '$.apellido');
+    DECLARE @nombre             NVARCHAR(80)     = JSON_VALUE(@json, '$.nombre');
+    DECLARE @correo             NVARCHAR(160)    = JSON_VALUE(@json, '$.correo');
+    DECLARE @telefonos          NVARCHAR(80)     = JSON_VALUE(@json, '$.telefonos');
+    DECLARE @fecha_reserva      DATE             = CAST(JSON_VALUE(@json, '$.fechaReserva')         AS DATE);
+    DECLARE @hora_reserva       TIME(0)          = CAST(JSON_VALUE(@json, '$.horaReserva')          AS TIME(0));
+    DECLARE @nro_restaurante    INT              = CAST(JSON_VALUE(@json, '$.nroRestaurante')       AS INT);
+    DECLARE @nro_sucursal       INT              = CAST(JSON_VALUE(@json, '$.nroSucursal')          AS INT);
+    DECLARE @cod_zona           INT              = CAST(JSON_VALUE(@json, '$.codZona')              AS INT);
+    DECLARE @cant_adultos       INT              = CAST(JSON_VALUE(@json, '$.cantAdultos')          AS INT);
+    DECLARE @cant_menores       INT              = CAST(JSON_VALUE(@json, '$.cantMenores')          AS INT);
+    DECLARE @costo_reserva      DECIMAL(12,2)    = CAST(JSON_VALUE(@json, '$.costoReserva')         AS DECIMAL(12,2));
+    DECLARE @cancelada          BIT              = ISNULL(TRY_CAST(JSON_VALUE(@json, '$.cancelada') AS BIT), 0);
+    DECLARE @fecha_cancelacion  DATE             = TRY_CAST(JSON_VALUE(@json, '$.fechaCancelacion') AS DATE);
 
 BEGIN TRY
 BEGIN TRAN;
@@ -598,16 +598,28 @@ END
 END;
 GO
 
+
 CREATE OR ALTER PROCEDURE dbo.get_horarios_disponibles
-    @nro_restaurante INT,
-    @nro_sucursal    INT,
-    @cod_zona        INT,
-    @fecha           DATE,
-    @cant_personas   INT,
-    @menores         BIT
+    @json NVARCHAR(MAX)
     AS
 BEGIN
     SET NOCOUNT ON;
+
+  DECLARE @nro_restaurante INT;
+SELECT TOP 1 @nro_restaurante = nro_restaurante
+FROM dbo.restaurantes
+ORDER BY nro_restaurante;
+
+IF @nro_restaurante IS NULL
+BEGIN
+            RAISERROR('No existe ningún restaurante.', 16, 1);
+            RETURN;
+END;
+    DECLARE @nro_sucursal    INT           = CAST(JSON_VALUE(@json, '$.idSucursal')    AS INT);
+    DECLARE @cod_zona        INT           = CAST(JSON_VALUE(@json, '$.codZona')        AS INT);
+    DECLARE @fecha           DATE          = CAST(JSON_VALUE(@json, '$.fecha')          AS DATE);
+    DECLARE @cant_personas   INT           = CAST(JSON_VALUE(@json, '$.cantComensales')   AS INT);
+    DECLARE @menores         BIT           = CAST(JSON_VALUE(@json, '$.menores')        AS BIT);
 
     IF @cant_personas <= 0
 BEGIN
@@ -715,22 +727,23 @@ GO
 
 
 CREATE OR ALTER PROCEDURE dbo.get_info_restaurante_rs
-    @nro_restaurante INT
     AS
 BEGIN
     SET NOCOUNT ON;
 
-    IF NOT EXISTS (SELECT 1 FROM dbo.restaurantes WHERE nro_restaurante = @nro_restaurante)
+    DECLARE @nro_restaurante INT;
+SELECT TOP 1 @nro_restaurante = nro_restaurante
+FROM dbo.restaurantes
+ORDER BY nro_restaurante;
+
+IF @nro_restaurante IS NULL
 BEGIN
-        RAISERROR('El restaurante especificado no existe.', 16, 1);
+        RAISERROR('No existe ningún restaurante.', 16, 1);
         RETURN;
 END;
 
     /* 1) Restaurante */
-SELECT
-    r.nro_restaurante,
-    r.razon_social,
-    r.cuit
+SELECT r.nro_restaurante, r.razon_social, r.cuit
 FROM dbo.restaurantes r
 WHERE r.nro_restaurante = @nro_restaurante;
 
@@ -835,6 +848,8 @@ END;
 GO
 
 
+
+
 CREATE OR ALTER PROCEDURE dbo.sp_clicks_contenidos_insertar_lote
     @clicks_json NVARCHAR(MAX)
     AS
@@ -845,30 +860,42 @@ BEGIN
     DECLARE @ahora DATETIME2 = SYSUTCDATETIME();
     DECLARE @error_message NVARCHAR(4000);
 
+    -- Obtener el primer restaurante
+    DECLARE @nro_restaurante INT;
+SELECT TOP 1 @nro_restaurante = nro_restaurante
+FROM dbo.restaurantes
+ORDER BY nro_restaurante;
+
+IF @nro_restaurante IS NULL
+BEGIN
+        RAISERROR('No existe ningún restaurante.', 16, 1);
+        RETURN;
+END;
+
 CREATE TABLE #ClicksTemp (
-                             id_temp INT IDENTITY(1,1),  -- ID temporal para ordenar
-                             nro_restaurante INT,
-                             nro_contenido INT,
-                             correo_cliente NVARCHAR(160),
+                             id_temp             INT IDENTITY(1,1),
+                             nro_restaurante     INT,
+                             nro_contenido       INT,
+                             correo_cliente      NVARCHAR(160),
                              fecha_hora_registro DATETIME2,
-                             nro_cliente INT NULL,
-                             costo_click DECIMAL(12,2) NULL,
-                             nro_click INT NULL
+                             nro_cliente         INT NULL,
+                             costo_click         DECIMAL(12,2) NULL,
+                             nro_click           INT NULL
 );
 
--- 1) Parsear JSON
+-- 1) Parsear JSON — nro_restaurante de la tabla, nro_contenido del split
 INSERT INTO #ClicksTemp (nro_restaurante, nro_contenido, correo_cliente, fecha_hora_registro)
 SELECT
-    nro_restaurante,
-    nro_contenido,
+    @nro_restaurante,
+    CAST(SUBSTRING(cod_contenido_restaurante,
+                   CHARINDEX('-', cod_contenido_restaurante) + 1, 100) AS INT),
     correo_cliente,
     ISNULL(CAST(fecha_hora_registro AS DATETIME2), @ahora)
 FROM OPENJSON(@clicks_json)
     WITH (
-    nro_restaurante INT '$.nro_restaurante',
-    nro_contenido INT '$.nro_contenido',
-    correo_cliente NVARCHAR(160) '$.correo_cliente',
-    fecha_hora_registro NVARCHAR(50) '$.fecha_hora_registro'
+    cod_contenido_restaurante NVARCHAR(100) '$.codContenidoRestaurante',
+    correo_cliente            NVARCHAR(160) '$.correoCliente',
+    fecha_hora_registro       NVARCHAR(50)  '$.fechaHoraRegistro'
     );
 
 -- 2) Resolver clientes
@@ -888,7 +915,7 @@ SET t.costo_click = c.costo_click
     FROM #ClicksTemp t
         INNER JOIN dbo.contenidos c WITH (UPDLOCK, HOLDLOCK)
 ON c.nro_restaurante = t.nro_restaurante
-    AND c.nro_contenido = t.nro_contenido;
+    AND c.nro_contenido  = t.nro_contenido;
 
 -- Validar contenidos
 IF EXISTS (SELECT 1 FROM #ClicksTemp WHERE costo_click IS NULL)
@@ -922,7 +949,7 @@ RAISERROR(@error_message, 16, 1);
             RETURN;
 END
 
-        -- 4) Calcular nro_click CORREGIDO
+        -- 4) Calcular nro_click
         DECLARE @nro_rest INT, @nro_cont INT, @max_click INT;
 
         DECLARE click_cursor CURSOR LOCAL FAST_FORWARD FOR
@@ -935,24 +962,21 @@ FETCH NEXT FROM click_cursor INTO @nro_rest, @nro_cont;
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
-            -- Obtener el máximo actual de la tabla principal
 SELECT @max_click = ISNULL(MAX(nro_click), 0)
 FROM dbo.clicks_contenidos WITH (UPDLOCK, HOLDLOCK)
 WHERE nro_restaurante = @nro_rest
-  AND nro_contenido = @nro_cont;
+  AND nro_contenido   = @nro_cont;
 
--- CORRECCIÓN: Asignar números secuenciales usando ROW_NUMBER
--- ordenados por id_temp para mantener el orden de inserción
 UPDATE t
 SET t.nro_click = @max_click + rn
     FROM #ClicksTemp t
             INNER JOIN (
                 SELECT
                     id_temp,
-                    ROW_NUMBER() OVER (ORDER BY id_temp) as rn
+                    ROW_NUMBER() OVER (ORDER BY id_temp) AS rn
                 FROM #ClicksTemp
                 WHERE nro_restaurante = @nro_rest
-                  AND nro_contenido = @nro_cont
+                  AND nro_contenido   = @nro_cont
             ) AS numbered ON t.id_temp = numbered.id_temp;
 
 FETCH NEXT FROM click_cursor INTO @nro_rest, @nro_cont;
@@ -963,12 +987,13 @@ DEALLOCATE click_cursor;
 
         -- 5) Insertar
 INSERT INTO dbo.clicks_contenidos
-(nro_restaurante, nro_contenido, nro_click, fecha_hora_registro, nro_cliente, costo_click)
+(nro_restaurante, nro_contenido, nro_click,
+ fecha_hora_registro, nro_cliente, costo_click)
 SELECT
     nro_restaurante, nro_contenido, nro_click,
     fecha_hora_registro, nro_cliente, costo_click
 FROM #ClicksTemp
-ORDER BY id_temp;  -- Mantener orden de inserción
+ORDER BY id_temp;
 
 COMMIT;
 
@@ -990,8 +1015,9 @@ DROP TABLE IF EXISTS #ClicksTemp;
 END;
 GO
 
+
+
 CREATE OR ALTER PROCEDURE dbo.get_contenidos
-    @nro_restaurante INT
     AS
 BEGIN
     SET NOCOUNT ON;
@@ -999,7 +1025,16 @@ BEGIN
 
 BEGIN TRY
 BEGIN TRAN;
+     DECLARE @nro_restaurante INT;
+SELECT TOP 1 @nro_restaurante = nro_restaurante
+FROM dbo.restaurantes
+ORDER BY nro_restaurante;
 
+IF @nro_restaurante IS NULL
+BEGIN
+         RAISERROR('No existe ningún restaurante.', 16, 1);
+         RETURN;
+END;
         -- 1) Obtener contenidos no publicados /
 SELECT
     c.nro_restaurante,
@@ -1012,8 +1047,6 @@ SELECT
 FROM dbo.contenidos c
 WHERE c.nro_restaurante = @nro_restaurante
   AND c.publicado = 0;
-
--- 2) Marcar como publicados
 
 COMMIT;
 END TRY
@@ -1032,17 +1065,28 @@ set publicado=0
 
     go
 CREATE OR ALTER PROCEDURE dbo.upd_publicar_contenidos_lote
-    @nro_restaurante INT,
-    @costo_click     DECIMAL(12,2),
-    @nro_contenidos  NVARCHAR(MAX)  -- Lista de IDs separados por coma: '1,2,3,4'
+    @json NVARCHAR(MAX)
     AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
+    DECLARE @nro_restaurante INT;
+SELECT TOP 1 @nro_restaurante = nro_restaurante
+FROM dbo.restaurantes
+ORDER BY nro_restaurante;
+
+IF @nro_restaurante IS NULL
+BEGIN
+             RAISERROR('No existe ningún restaurante.', 16, 1);
+             RETURN;
+END;
+    DECLARE @costo_click     DECIMAL(12,2) = CAST(JSON_VALUE(@json, '$.costoAplicado') AS DECIMAL(12,2));
+    DECLARE @nro_contenidos  NVARCHAR(MAX) = JSON_VALUE(@json, '$.nroContenidos');
+
+    -- todo el resto del procedimiento queda EXACTAMENTE igual
 BEGIN TRY
 BEGIN TRAN;
-
         ------------------------------------------------------------
         -- 1) Crear tabla temporal con los IDs
         ------------------------------------------------------------
@@ -1103,32 +1147,41 @@ END;
 GO
 
 CREATE OR ALTER PROCEDURE dbo.ins_cliente_reserva_sucursal
-    -- Cliente
-    @nro_cliente        INT              = NULL,
-    @apellido           NVARCHAR(80)     = NULL,
-    @nombre             NVARCHAR(80)     = NULL,
-    @correo             NVARCHAR(160)    = NULL,
-    @telefonos          NVARCHAR(80)     = NULL,
-
-    -- Reserva
-    @cod_reserva        UNIQUEIDENTIFIER = NULL,  -- ignorado (DEFAULT NEWSEQUENTIALID())
-    @fecha_reserva      DATE,
-    @hora_reserva       TIME(0),
-    @nro_restaurante    INT,
-    @nro_sucursal       INT,
-    @cod_zona           INT,
-    @cant_adultos       INT,
-    @cant_menores       INT,
-    @costo_reserva      DECIMAL(12,2)    = 0,
-    @cancelada          BIT              = 0,
-    @fecha_cancelacion  DATE             = NULL,
-
-    -- salida (si la querés usar desde Java como OUTPUT)
-    @o_cod_reserva      UNIQUEIDENTIFIER OUTPUT
+    @json NVARCHAR(MAX)
     AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
+
+    -- Datos del cliente
+    DECLARE @apellido           NVARCHAR(80)  = JSON_VALUE(@json, '$.solicitudCliente.apellido');
+    DECLARE @nombre             NVARCHAR(80)  = JSON_VALUE(@json, '$.solicitudCliente.nombre');
+    DECLARE @correo             NVARCHAR(160) = JSON_VALUE(@json, '$.solicitudCliente.correo');
+    DECLARE @telefonos          NVARCHAR(80)  = JSON_VALUE(@json, '$.solicitudCliente.telefonos');
+
+    -- Datos de la reserva
+    DECLARE @nro_restaurante    INT;
+SELECT TOP 1 @nro_restaurante = nro_restaurante
+FROM dbo.restaurantes
+ORDER BY nro_restaurante;
+
+IF @nro_restaurante IS NULL
+BEGIN
+        RAISERROR('No existe ningún restaurante.', 16, 1);
+        RETURN;
+END;
+
+    DECLARE @cod_sucursal_restaurante NVARCHAR(20) = JSON_VALUE(@json, '$.reserva.codSucursalRestaurante');
+    DECLARE @nro_sucursal       INT           = CAST(SUBSTRING(@cod_sucursal_restaurante,
+                                                    CHARINDEX('-', @cod_sucursal_restaurante) + 1, 20) AS INT);
+    DECLARE @fecha_reserva      DATE          = CAST(JSON_VALUE(@json, '$.reserva.fechaReserva')  AS DATE);
+    DECLARE @hora_reserva       TIME(0)       = CAST(JSON_VALUE(@json, '$.reserva.horaReserva')   AS TIME(0));
+    DECLARE @cod_zona           INT           = CAST(JSON_VALUE(@json, '$.reserva.codZona')        AS INT);
+    DECLARE @cant_adultos       INT           = CAST(JSON_VALUE(@json, '$.reserva.cantAdultos')    AS INT);
+    DECLARE @cant_menores       INT           = CAST(JSON_VALUE(@json, '$.reserva.cantMenores')    AS INT);
+    DECLARE @costo_reserva      DECIMAL(12,2) = CAST(JSON_VALUE(@json, '$.reserva.costoReserva')  AS DECIMAL(12,2));
+    DECLARE @cancelada          BIT           = 0;
+    DECLARE @fecha_cancelacion  DATE          = NULL;
 
 BEGIN TRY
 BEGIN TRAN;
@@ -1141,8 +1194,8 @@ BEGIN TRAN;
         IF @cant_personas <= 0
             THROW 51010, 'La cantidad de personas debe ser mayor a 0.', 1;
 
-        IF @correo IS NULL AND @nro_cliente IS NULL
-            THROW 51011, 'Debe informar nro_cliente o correo.', 1;
+        IF @correo IS NULL
+            THROW 51011, 'Debe informar correo.', 1;
 
         ------------------------------------------------------------
         -- 1) Validar zona existe y habilitada + cupo base + permite menores
@@ -1170,8 +1223,7 @@ IF @capacidad_total IS NULL OR @zona_habilitada <> 1
         -- 2) Validar turno existe/habilitado y asociado a la zona
         ------------------------------------------------------------
         IF NOT EXISTS (
-            SELECT 1
-            FROM dbo.turnos_sucursales t
+            SELECT 1 FROM dbo.turnos_sucursales t
             WHERE t.nro_restaurante = @nro_restaurante
               AND t.nro_sucursal    = @nro_sucursal
               AND t.hora_reserva    = @hora_reserva
@@ -1180,8 +1232,7 @@ IF @capacidad_total IS NULL OR @zona_habilitada <> 1
             THROW 51014, 'El turno no existe o no está habilitado para la sucursal.', 1;
 
         IF NOT EXISTS (
-            SELECT 1
-            FROM dbo.zonas_turnos_sucursales zts
+            SELECT 1 FROM dbo.zonas_turnos_sucursales zts
             WHERE zts.nro_restaurante = @nro_restaurante
               AND zts.nro_sucursal    = @nro_sucursal
               AND zts.cod_zona        = @cod_zona
@@ -1189,26 +1240,11 @@ IF @capacidad_total IS NULL OR @zona_habilitada <> 1
         )
             THROW 51015, 'La zona no está habilitada para ese turno.', 1;
 
-        -- (Opcional) Si querés validar menores por turno:
-        -- IF @cant_menores > 0 AND EXISTS(
-        --     SELECT 1 FROM dbo.zonas_turnos_sucursales zts
-        --     WHERE zts.nro_restaurante=@nro_restaurante AND zts.nro_sucursal=@nro_sucursal
-        --       AND zts.cod_zona=@cod_zona AND zts.hora_reserva=@hora_reserva
-        --       AND ISNULL(zts.permite_menores,1)=0
-        -- )
-        --     THROW 51016, 'Ese turno/zona no permite menores.', 1;
-
         ------------------------------------------------------------
         -- 3) Resolver cliente (reusar por correo o insertar)
         ------------------------------------------------------------
         DECLARE @cliente_id INT;
 
-        IF @nro_cliente IS NOT NULL
-BEGIN
-            SET @cliente_id = @nro_cliente;
-END
-ELSE
-BEGIN
 SELECT @cliente_id = c.nro_cliente
 FROM dbo.clientes c
 WHERE c.correo = @correo;
@@ -1220,16 +1256,13 @@ VALUES (@apellido, @nombre, @correo, @telefonos);
 
 SET @cliente_id = SCOPE_IDENTITY();
 END
-END
 
         ------------------------------------------------------------
         -- 4) Validar disponibilidad REAL (concurrencia controlada)
-        --    Lockear reservas existentes del mismo turno/fecha/zona
         ------------------------------------------------------------
         DECLARE @ocupados INT;
 
-SELECT
-    @ocupados = SUM(ISNULL(r.cant_adultos,0) + ISNULL(r.cant_menores,0))
+SELECT @ocupados = SUM(ISNULL(r.cant_adultos,0) + ISNULL(r.cant_menores,0))
 FROM dbo.reservas_sucursales r WITH (UPDLOCK, HOLDLOCK)
 WHERE r.nro_restaurante = @nro_restaurante
   AND r.nro_sucursal    = @nro_sucursal
@@ -1264,19 +1297,14 @@ VALUES
     @cancelada, @fecha_cancelacion
     );
 
--- set output param
-SELECT @o_cod_reserva = (SELECT TOP 1 cod_reserva FROM @t);
-
 COMMIT;
 
--- Resultset para Java
-SELECT cod_reserva = @o_cod_reserva;
+SELECT cod_reserva = (SELECT TOP 1 cod_reserva FROM @t);
 
 END TRY
 BEGIN CATCH
 IF XACT_STATE() <> 0 ROLLBACK;
 
-        -- Mensaje amigable si choca UNIQUE de correo
         IF ERROR_NUMBER() IN (2627,2601) AND CHARINDEX('AK_clientes_correo', ERROR_MESSAGE()) > 0
             THROW 51030, 'El correo de cliente ya existe.', 1;
 
@@ -1284,6 +1312,7 @@ IF XACT_STATE() <> 0 ROLLBACK;
 END CATCH
 END
 GO
+
 
 CREATE OR ALTER PROCEDURE dbo.cancelar_reserva_por_codigo_sucursal
     @cod_reserva_sucursal NVARCHAR(80)
@@ -1407,20 +1436,21 @@ END CATCH
 END;
 GO
 
-CREATE OR ALTER PROCEDURE dbo.modificar_reserva_por_codigo_sucursal
-    @cod_reserva_sucursal NVARCHAR(80),
 
-    -- Nuevos datos
-    @fecha_reserva  DATE,
-    @hora_reserva   TIME(0),
-    @cod_zona       INT,
-    @cant_adultos   INT,
-    @cant_menores   INT,
-    @costo_reserva  Decimal(12,2)
+CREATE OR ALTER PROCEDURE dbo.modificar_reserva_por_codigo_sucursal
+    @json NVARCHAR(MAX)
     AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
+
+    DECLARE @cod_reserva_sucursal NVARCHAR(80)   = JSON_VALUE(@json, '$.codReservaSucursal');
+    DECLARE @fecha_reserva        DATE            = CAST(JSON_VALUE(@json, '$.fechaReserva')  AS DATE);
+    DECLARE @hora_reserva         TIME(0)         = CAST(JSON_VALUE(@json, '$.horaReserva')   AS TIME(0));
+    DECLARE @cod_zona             INT             = CAST(JSON_VALUE(@json, '$.codZona')        AS INT);
+    DECLARE @cant_adultos         INT             = CAST(JSON_VALUE(@json, '$.cantAdultos')    AS INT);
+    DECLARE @cant_menores         INT             = CAST(JSON_VALUE(@json, '$.cantMenores')    AS INT);
+    DECLARE @costo_reserva        DECIMAL(12,2)   = CAST(JSON_VALUE(@json, '$.costoReserva')  AS DECIMAL(12,2));
 
     DECLARE
 @pos               INT,
