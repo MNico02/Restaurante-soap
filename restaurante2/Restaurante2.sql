@@ -862,6 +862,7 @@ BEGIN
 
     -- Obtener el primer restaurante
     DECLARE @nro_restaurante INT;
+
 SELECT TOP 1 @nro_restaurante = nro_restaurante
 FROM dbo.restaurantes
 ORDER BY nro_restaurante;
@@ -883,33 +884,43 @@ CREATE TABLE #ClicksTemp (
                              nro_click           INT NULL
 );
 
--- 1) Parsear JSON — nro_restaurante de la tabla, nro_contenido del split
-INSERT INTO #ClicksTemp (nro_restaurante, nro_contenido, correo_cliente, fecha_hora_registro)
+------------------------------------------------------------
+-- 1) Parsear JSON
+------------------------------------------------------------
+INSERT INTO #ClicksTemp
+(nro_restaurante, nro_contenido, correo_cliente, fecha_hora_registro)
 SELECT
     @nro_restaurante,
     CAST(SUBSTRING(cod_contenido_restaurante,
                    CHARINDEX('-', cod_contenido_restaurante) + 1, 100) AS INT),
-    correo_cliente,
+    LTRIM(RTRIM(LOWER(correo_cliente))),   -- 🔥 normalizado
     ISNULL(CAST(fecha_hora_registro AS DATETIME2), @ahora)
 FROM OPENJSON(@clicks_json)
     WITH (
     cod_contenido_restaurante NVARCHAR(100) '$.codContenidoRestaurante',
-    correo_cliente            NVARCHAR(160) '$.correoCliente',
+    correo_cliente            NVARCHAR(160) '$.correo_cliente',
     fecha_hora_registro       NVARCHAR(50)  '$.fechaHoraRegistro'
     );
 
--- 2) Resolver clientes
+------------------------------------------------------------
+-- 2) Resolver clientes (CORREGIDO)
+------------------------------------------------------------
 UPDATE t
 SET t.nro_cliente = c.nro_cliente
     FROM #ClicksTemp t
-    INNER JOIN dbo.clientes c ON c.correo = t.correo_cliente
+    INNER JOIN dbo.clientes c
+ON LTRIM(RTRIM(LOWER(c.correo))) COLLATE Latin1_General_CI_AI
+    = t.correo_cliente COLLATE Latin1_General_CI_AI
 WHERE t.correo_cliente IS NOT NULL;
 
 SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 BEGIN TRAN;
 
 BEGIN TRY
+
+        ------------------------------------------------------------
         -- 3) Obtener costos
+        ------------------------------------------------------------
 UPDATE t
 SET t.costo_click = c.costo_click
     FROM #ClicksTemp t
@@ -917,7 +928,6 @@ SET t.costo_click = c.costo_click
 ON c.nro_restaurante = t.nro_restaurante
     AND c.nro_contenido  = t.nro_contenido;
 
--- Validar contenidos
 IF EXISTS (SELECT 1 FROM #ClicksTemp WHERE costo_click IS NULL)
 BEGIN
             DECLARE @rest INT, @cont INT;
@@ -933,7 +943,8 @@ FETCH NEXT FROM contenidos_faltantes INTO @rest, @cont;
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
-                SET @msg_temp = @msg_temp + 'Rest:' + CAST(@rest AS VARCHAR) +
+                SET @msg_temp = @msg_temp +
+                                'Rest:' + CAST(@rest AS VARCHAR) +
                                 ' Cont:' + CAST(@cont AS VARCHAR) + '; ';
 FETCH NEXT FROM contenidos_faltantes INTO @rest, @cont;
 END
@@ -949,7 +960,9 @@ RAISERROR(@error_message, 16, 1);
             RETURN;
 END
 
+        ------------------------------------------------------------
         -- 4) Calcular nro_click
+        ------------------------------------------------------------
         DECLARE @nro_rest INT, @nro_cont INT, @max_click INT;
 
         DECLARE click_cursor CURSOR LOCAL FAST_FORWARD FOR
@@ -971,13 +984,13 @@ UPDATE t
 SET t.nro_click = @max_click + rn
     FROM #ClicksTemp t
             INNER JOIN (
-                SELECT
-                    id_temp,
-                    ROW_NUMBER() OVER (ORDER BY id_temp) AS rn
+                SELECT id_temp,
+                       ROW_NUMBER() OVER (ORDER BY id_temp) AS rn
                 FROM #ClicksTemp
                 WHERE nro_restaurante = @nro_rest
                   AND nro_contenido   = @nro_cont
-            ) AS numbered ON t.id_temp = numbered.id_temp;
+            ) AS numbered
+ON t.id_temp = numbered.id_temp;
 
 FETCH NEXT FROM click_cursor INTO @nro_rest, @nro_cont;
 END
@@ -985,7 +998,9 @@ END
 CLOSE click_cursor;
 DEALLOCATE click_cursor;
 
+        ------------------------------------------------------------
         -- 5) Insertar
+        ------------------------------------------------------------
 INSERT INTO dbo.clicks_contenidos
 (nro_restaurante, nro_contenido, nro_click,
  fecha_hora_registro, nro_cliente, costo_click)
@@ -997,7 +1012,9 @@ ORDER BY id_temp;
 
 COMMIT;
 
+------------------------------------------------------------
 -- 6) Retornar resultados
+------------------------------------------------------------
 SELECT
     nro_restaurante, nro_contenido, nro_click,
     fecha_hora_registro, nro_cliente, correo_cliente, costo_click
@@ -1014,8 +1031,6 @@ END CATCH
 DROP TABLE IF EXISTS #ClicksTemp;
 END;
 GO
-
-
 
 CREATE OR ALTER PROCEDURE dbo.get_contenidos
     AS

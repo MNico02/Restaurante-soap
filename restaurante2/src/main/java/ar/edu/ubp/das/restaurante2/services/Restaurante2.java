@@ -88,8 +88,10 @@ public class Restaurante2 {
     @ResponseWrapper(localName = "cancelarReservaResponse")
     @WebResult(name = "jsonResponse")
     public String cancelarReserva( @WebParam(name = "jsonRequest") String jsonRequest) {
-        CancelarReservaReqBean request = gson.fromJson(jsonRequest, CancelarReservaReqBean.class);
-        ResponseBean response = restaurante2Repository.cancelarReservaPorCodigoSucursal(request.getCodReservaSucursal());
+        Gson gson = new Gson();
+        JsonObject json = gson.fromJson(jsonRequest, JsonObject.class);
+        String cod = json.get("codReservaSucursal").getAsString();
+        ResponseBean response = restaurante2Repository.cancelarReservaPorCodigoSucursal(cod);
         return gson.toJson(response);
     }
 
