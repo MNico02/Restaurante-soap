@@ -19,6 +19,6 @@ Este proyecto forma parte del ecosistema **Ristorino** y actúa como un proveedo
 * **Protocolo de Comunicación:** Interfaz SOAP (WSDL) operando como Wrapper para transporte de payloads en formato JSON stringificado.
 * **Base de Datos:** MySQL
 
-##👨‍💻 Autor
+## 👨‍💻 Autor
 * Nicolás Moresco
 * Email: nicolasmoresco02@gmail.com
